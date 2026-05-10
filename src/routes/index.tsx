@@ -44,13 +44,18 @@ function Home() {
   };
 
   const onLoaderDone = () => {
+    const derivedType =
+      sources.length === 0 ? "Mixed" :
+      sources.length > 1 ? "Mixed" :
+      (["Email", "Slack", "WhatsApp"].includes(sources[0]) ? sources[0] : "Mixed");
     storeActions.addCorpus({
       ...mockCorpus,
       id: `corpus-${Date.now()}`,
       name: name || mockCorpus.name,
-      source_type: source as any,
+      source_type: derivedType as any,
+      sources,
       source_label: label,
-      language: lang,
+      language: langs.join(" + ") || "English",
     });
     setLoading(false);
     navigate({ to: "/profile" });
