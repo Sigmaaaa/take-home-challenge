@@ -91,11 +91,10 @@ function GeneratePage() {
 
   return (
     <div className="pb-20">
-      <h1 className="text-[44px] text-tighter text-text-primary mb-8 leading-none">Generate</h1>
-
-      <div className="grid grid-cols-[1fr_280px] gap-8 mb-6 items-start">
-        {/* Left: context */}
-        <div className="min-w-0">
+      <div className="grid grid-cols-[1fr_280px] gap-8 mb-6 items-stretch">
+        {/* Left: heading + context */}
+        <div className="min-w-0 flex flex-col">
+          <h1 className="text-[44px] text-tighter text-text-primary mb-6 leading-none">Generate</h1>
           <label className="block text-[10px] small-caps text-text-muted mb-1.5">Context</label>
           <div className="flex flex-wrap gap-2 mb-3">
             {sourcePills.map((c) => {
