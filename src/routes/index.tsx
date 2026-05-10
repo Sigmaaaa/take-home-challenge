@@ -39,9 +39,8 @@ function Home() {
   const [label, setLabel] = useState("");
   const [langs, setLangs] = useState<string[]>(["English"]);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+  const [apiDone, setApiDone] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
 
   const onAnalyze = async () => {
@@ -51,13 +50,7 @@ function Home() {
 
     const source_type = (sources[0] || "custom").toLowerCase();
     setLoading(true);
-    setStep(0);
-    setDone(false);
-
-    // Animate loader lines on a 1.5s cadence while requests are in-flight
-    const interval = setInterval(() => {
-      setStep((s) => Math.min(s + 1, EXTRACTION_LINES.length - 1));
-    }, 1500);
+    setApiDone(false);
 
     try {
       const ingest = await callFn<{ corpus_id: string }>("ingest-corpus", {
@@ -69,12 +62,9 @@ function Home() {
       });
       const corpusId = ingest.corpus_id;
       await callFn("extract-style", { corpus_id: corpusId });
-      clearInterval(interval);
-      setStep(EXTRACTION_LINES.length - 1);
-      setDone(true);
       setPendingId(corpusId);
+      setApiDone(true);
     } catch (e: any) {
-      clearInterval(interval);
       setLoading(false);
       setError(e?.message || "Something went wrong.");
     }
@@ -97,10 +87,10 @@ function Home() {
     <>
       {loading && (
         <TerminalLoader
-          lines={EXTRACTION_LINES.slice(0, step + 1)}
+          lines={EXTRACTION_LINES}
           intervalMs={1500}
-          onDone={done ? onLoaderDone : undefined}
-          finalDelayMs={500}
+          apiDone={apiDone}
+          onDone={onLoaderDone}
         />
       )}
 
