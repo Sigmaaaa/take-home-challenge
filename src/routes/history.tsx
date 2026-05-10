@@ -90,9 +90,10 @@ function HistoryPage() {
       )}
 
       <div className="border border-border bg-surface">
-        <div className="grid grid-cols-[24px_1fr_120px_90px_100px_24px] gap-4 px-5 py-3 border-b border-border text-[10px] small-caps text-text-muted">
+        <div className="grid grid-cols-[24px_1fr_140px_110px_80px_90px_24px] gap-4 px-5 py-3 border-b border-border text-[10px] small-caps text-text-muted">
           <div />
           <div>Prompt</div>
+          <div>Corpus</div>
           <div>Context</div>
           <div>Score</div>
           <div>Date</div>
@@ -101,9 +102,10 @@ function HistoryPage() {
         {isLoading && (
           <div className="divide-y divide-border">
             {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="grid grid-cols-[24px_1fr_120px_90px_100px_24px] gap-4 px-5 py-4 items-center animate-pulse">
+              <div key={i} className="grid grid-cols-[24px_1fr_140px_110px_80px_90px_24px] gap-4 px-5 py-4 items-center animate-pulse">
                 <div className="size-3 rounded-sm bg-surface-elevated" />
                 <div className="h-3 bg-surface-elevated rounded-sm w-3/4" />
+                <div className="h-3 bg-surface-elevated rounded-sm w-20" />
                 <div className="h-3 bg-surface-elevated rounded-sm w-16" />
                 <div className="h-4 bg-surface-elevated rounded-sm w-12" />
                 <div className="h-3 bg-surface-elevated rounded-sm w-20" />
@@ -149,13 +151,22 @@ function Row({ g, open, onToggle }: { g: GenRow; open: boolean; onToggle: () => 
         role="button"
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
-        className="group w-full grid grid-cols-[24px_1fr_120px_90px_100px_24px] gap-4 px-5 py-3 border-b border-border text-left hover:bg-surface-elevated transition-colors items-center cursor-pointer"
+        className="group w-full grid grid-cols-[24px_1fr_140px_110px_80px_90px_24px] gap-4 px-5 py-3 border-b border-border text-left hover:bg-surface-elevated transition-colors items-center cursor-pointer"
       >
         <DeleteGenerationButton generationId={g.id} />
         <div className="text-sm text-text-primary truncate">
           {g.prompt.slice(0, 80)}{g.prompt.length > 80 ? "…" : ""}
         </div>
-        <div className="text-xs text-text-secondary">{g.context_type || "—"}</div>
+        <div className="min-w-0">
+          {g.style_profile?.corpus?.name ? (
+            <span className="inline-block max-w-full truncate font-mono text-[11px] px-2 py-0.5 border border-border rounded-sm text-text-secondary bg-background">
+              {g.style_profile.corpus.name}
+            </span>
+          ) : (
+            <span className="text-xs text-text-muted">—</span>
+          )}
+        </div>
+        <div className="text-xs text-text-secondary truncate">{g.context_type || "—"}</div>
         <div>
           <span className={`font-mono text-xs px-2 py-0.5 rounded-sm border ${c}`}>
             {overall.toFixed(3)}
