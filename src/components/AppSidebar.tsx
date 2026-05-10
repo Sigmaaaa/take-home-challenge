@@ -1,8 +1,19 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, History, Database, User, Wand2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Home, History, Database, User, Wand2, Trash2 } from "lucide-react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useState } from "react";
 import { useStore, storeActions } from "@/lib/store";
-import { supabase } from "@/lib/supabase";
+import { supabase, callFn } from "@/lib/supabase";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const nav = [
   { to: "/", label: "Home", icon: Home },
@@ -20,6 +31,9 @@ export function AppSidebar() {
   const { activeCorpusId } = useStore();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+  const qc = useQueryClient();
+  const [pending, setPending] = useState<CorpusRow | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const { data: corpora = [] } = useQuery<CorpusRow[]>({
     queryKey: ["corpora"],
@@ -31,6 +45,25 @@ export function AppSidebar() {
       if (error) throw error;
       return (data ?? []) as CorpusRow[];
     },
+  });
+
+  const deleteMut = useMutation({
+    mutationFn: async (corpus_id: string) => {
+      await callFn("delete-corpus", { corpus_id });
+      return corpus_id;
+    },
+    onSuccess: (corpus_id) => {
+      qc.setQueryData<CorpusRow[]>(["corpora"], (prev) =>
+        (prev ?? []).filter((r) => r.id !== corpus_id),
+      );
+      if (activeCorpusId === corpus_id) {
+        storeActions.setActiveCorpus(null);
+        navigate({ to: "/" });
+      }
+      setPending(null);
+      setError(null);
+    },
+    onError: (e: Error) => setError(e.message),
   });
 
   return (
@@ -71,33 +104,46 @@ export function AppSidebar() {
         {corpora.map((c) => {
           const active = c.id === activeCorpusId;
           return (
-            <div key={c.id} className={`mb-1 rounded-sm border-l-2 ${active ? "border-l-indigo bg-surface" : "border-l-transparent"}`}>
-              <button
-                onClick={() => {
-                  storeActions.setActiveCorpus(c.id);
-                  navigate({ to: "/profile" });
-                }}
-                className={`w-full text-left px-3 py-2 text-xs transition-colors rounded-sm ${
-                  active ? "text-text-primary" : "text-text-secondary hover:bg-surface hover:text-text-primary"
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <Database className="size-3 shrink-0 opacity-60" />
-                  <span className="truncate flex-1">{c.name}</span>
-                </div>
-                <div className="mt-1 ml-5 flex items-center gap-2">
-                  {c.source_type && (
-                    <span className="inline-block text-[9px] small-caps px-1.5 py-0.5 border border-border rounded-sm text-text-muted">
-                      {c.source_type}
-                    </span>
-                  )}
-                  {c.created_at && (
-                    <span className="text-[10px] text-text-muted font-mono">
-                      {new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                    </span>
-                  )}
-                </div>
-              </button>
+            <div key={c.id} className={`group/corpus mb-1 rounded-sm border-l-2 ${active ? "border-l-indigo bg-surface" : "border-l-transparent"}`}>
+              <div className="relative">
+                <button
+                  onClick={() => {
+                    storeActions.setActiveCorpus(c.id);
+                    navigate({ to: "/profile" });
+                  }}
+                  className={`w-full text-left px-3 py-2 pr-8 text-xs transition-colors rounded-sm ${
+                    active ? "text-text-primary" : "text-text-secondary hover:bg-surface hover:text-text-primary"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Database className="size-3 shrink-0 opacity-60" />
+                    <span className="truncate flex-1">{c.name}</span>
+                  </div>
+                  <div className="mt-1 ml-5 flex items-center gap-2">
+                    {c.source_type && (
+                      <span className="inline-block text-[9px] small-caps px-1.5 py-0.5 border border-border rounded-sm text-text-muted">
+                        {c.source_type}
+                      </span>
+                    )}
+                    {c.created_at && (
+                      <span className="text-[10px] text-text-muted font-mono">
+                        {new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                    )}
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setError(null);
+                    setPending(c);
+                  }}
+                  aria-label="Delete corpus"
+                  className="absolute top-2 right-2 p-1 rounded-sm text-text-muted opacity-0 group-hover/corpus:opacity-100 hover:text-danger hover:bg-surface-elevated transition-opacity"
+                >
+                  <Trash2 className="size-3" />
+                </button>
+              </div>
               {active && (
                 <div className="px-3 pb-2 ml-5 flex flex-col gap-0.5">
                   <Link
@@ -126,6 +172,35 @@ export function AppSidebar() {
       <div className="px-5 py-3 border-t border-border">
         <span className="text-[10px] font-mono text-text-muted">v0.1.0 · build a3f</span>
       </div>
+
+      <AlertDialog open={!!pending} onOpenChange={(o) => !o && !deleteMut.isPending && setPending(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this corpus and all its generations?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pending ? `"${pending.name}" and its style profile, generations, and scores will be permanently removed.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          {error && (
+            <div className="border border-danger/50 bg-danger/10 text-danger text-xs px-3 py-2 rounded-sm font-mono">
+              {error}
+            </div>
+          )}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMut.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={deleteMut.isPending}
+              onClick={(e) => {
+                e.preventDefault();
+                if (pending) deleteMut.mutate(pending.id);
+              }}
+              className="bg-danger text-white hover:bg-danger/90"
+            >
+              {deleteMut.isPending ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </aside>
   );
 }
