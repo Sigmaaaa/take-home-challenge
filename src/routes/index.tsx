@@ -27,6 +27,11 @@ function Home() {
 
   const loading = extraction.active;
 
+  const messageCount = text.trim()
+    ? text.split(/^---\s*$/m).map((s) => s.trim()).filter(Boolean).length
+    : 0;
+  const tooSmall = messageCount > 0 && messageCount < 5;
+
   // Surface async extraction errors from the global store
   useEffect(() => {
     if (extraction.error) setError(extraction.error);
@@ -134,9 +139,23 @@ function Home() {
             </div>
           )}
 
+          {messageCount > 0 && (
+            <div className={`mt-3 text-xs font-mono ${
+              tooSmall ? "text-danger"
+              : messageCount < 20 ? "text-warning"
+              : messageCount < 50 ? "text-text-muted"
+              : "text-success"
+            }`}>
+              {tooSmall && `✗ Too small — minimum 5 messages required (${messageCount} detected)`}
+              {messageCount >= 5 && messageCount < 20 && `⚠ ${messageCount} messages detected — low confidence profile. Add more for better results.`}
+              {messageCount >= 20 && messageCount < 50 && `○ ${messageCount} messages detected — medium confidence.`}
+              {messageCount >= 50 && `✓ ${messageCount} messages detected — good corpus size.`}
+            </div>
+          )}
+
           <button
             onClick={onAnalyze}
-            disabled={loading}
+            disabled={loading || tooSmall}
             className="mt-5 w-full bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] disabled:opacity-50 text-white text-sm font-medium py-3 rounded-sm transition-colors"
           >
             Analyze Style →

@@ -116,6 +116,7 @@ function GeneratePage() {
   const flat = { ...g, ...m } as any;
   const formality = Number(g.formality_score ?? profile?.formality_score ?? 0);
   const cog = profileRoot?.cognitive_spike ?? {};
+  const dataConfidence = (profile as any)?.extraction_metadata?.data_confidence as "low" | "medium" | "high" | undefined;
 
   return (
     <div className="pb-20">
@@ -183,6 +184,12 @@ function GeneratePage() {
           >
             {phase === "loading" ? "Generating…" : phase === "scoring" ? "Scoring…" : "Generate"}
           </button>
+
+          {dataConfidence === "low" && (
+            <div className="mt-2 text-xs text-warning font-mono">
+              Note: Low corpus confidence may affect output quality. Consider adding more writing samples.
+            </div>
+          )}
 
           {phase === "idle" && (
             <>
@@ -331,6 +338,28 @@ function ScoreCard({ score }: { score: any }) {
           {reasoning}
         </p>
       )}
+
+      {score?.data_quality && (() => {
+        const dq = score.data_quality;
+        const conf = String(dq.confidence ?? "").toUpperCase();
+        const confColor = conf === "HIGH" ? "text-success" : conf === "MEDIUM" ? "text-warning" : conf === "LOW" ? "text-danger" : "text-text-secondary";
+        return (
+          <div className="mt-5 border-t border-border pt-4">
+            <div className="text-[10px] small-caps text-text-muted mb-2">Data Quality</div>
+            <div className="text-xs font-mono text-text-secondary">
+              Corpus: {dq.message_count ?? dq.messages ?? "—"} messages · Confidence: <span className={confColor}>{conf || "—"}</span>
+            </div>
+            {(dq.reliable_features != null) && (
+              <div className="text-xs font-mono text-text-secondary mt-1">
+                Reliable features: {dq.reliable_features}/7
+              </div>
+            )}
+            {dq.note && (
+              <p className="text-xs text-text-muted italic mt-2">{dq.note}</p>
+            )}
+          </div>
+        );
+      })()}
     </div>
   );
 }

@@ -70,6 +70,11 @@ function ProfilePage() {
 
   const dateStr = c.created_at ? new Date(c.created_at).toISOString().slice(0, 10) : "";
 
+  const meta = data.profile?.extraction_metadata as any;
+  const confidence = meta?.data_confidence as "low" | "medium" | "high" | undefined;
+  const lowDims: string[] = Array.isArray(meta?.low_confidence_dimensions) ? meta.low_confidence_dimensions : [];
+  const isLow = (key: string) => lowDims.includes(key);
+
   return (
     <div className="pb-20 animate-[fadeIn_400ms_ease-out_both]">
       <style>{`@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }`}</style>
@@ -94,30 +99,41 @@ function ProfilePage() {
         </div>
       </header>
 
+      {confidence === "low" && (
+        <div className="mb-6 border border-warning/50 bg-warning/10 text-warning text-xs px-4 py-3 rounded-sm font-mono">
+          ⚠ Low data confidence — profile based on limited writing samples. Patterns marked ~ may not be reliable. Add more writing for a stronger fingerprint.
+        </div>
+      )}
+      {confidence === "medium" && (
+        <div className="mb-6 border border-border bg-surface text-text-muted text-xs px-4 py-3 rounded-sm font-mono">
+          ○ Medium confidence — some dimensions may improve with more samples.
+        </div>
+      )}
+
       <Section title="Global" defaultOpen>
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] small-caps text-text-muted">Formality Score</span>
+            <span className="text-[10px] small-caps text-text-muted">Formality Score{isLow("formality_score") && <LowMark />}</span>
             <span className="font-mono text-sm text-text-primary">{formality.toFixed(2)}</span>
           </div>
           <Bar value={formality} />
         </div>
-        <KV label="Register" value={p.register} />
-        <KV label="Avg Message Length" value={p.avg_message_length} mono />
-        <KV label="Overall Tone" value={p.overall_tone} />
-        <KV label="Social Orientation" value={p.social_orientation} />
-        <KV label="Politeness Strategy" value={p.politeness_strategy} />
+        <KV label="Register" value={p.register} low={isLow("register")} />
+        <KV label="Avg Message Length" value={p.avg_message_length} mono low={isLow("avg_message_length")} />
+        <KV label="Overall Tone" value={p.overall_tone} low={isLow("overall_tone")} />
+        <KV label="Social Orientation" value={p.social_orientation} low={isLow("social_orientation")} />
+        <KV label="Politeness Strategy" value={p.politeness_strategy} low={isLow("politeness_strategy")} />
       </Section>
 
       <Section title="Mid-Level">
-        <KV label="Sentence Rhythm" value={p.sentence_rhythm} />
-        <KV label="Question Frequency" value={p.question_frequency} mono />
-        <ChipsRow label="Structural Habits" items={arr(p.structural_habits)} tag />
-        <KV label="Information Structure" value={p.information_structure} />
-        <KV label="Follow-up Behavior" value={p.follow_up_behavior} />
+        <KV label="Sentence Rhythm" value={p.sentence_rhythm} low={isLow("sentence_rhythm")} />
+        <KV label="Question Frequency" value={p.question_frequency} mono low={isLow("question_frequency")} />
+        <ChipsRow label="Structural Habits" items={arr(p.structural_habits)} tag low={isLow("structural_habits")} />
+        <KV label="Information Structure" value={p.information_structure} low={isLow("information_structure")} />
+        <KV label="Follow-up Behavior" value={p.follow_up_behavior} low={isLow("follow_up_behavior")} />
 
         <div className="py-3 border-b border-border">
-          <div className="text-[10px] small-caps text-text-muted mb-2">Openers</div>
+          <div className="text-[10px] small-caps text-text-muted mb-2">Openers{isLow("opener_patterns") && <LowMark />}</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
             {arr(get(p, "opener_patterns", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
           </div>
@@ -127,7 +143,7 @@ function ProfilePage() {
         </div>
 
         <div className="py-3">
-          <div className="text-[10px] small-caps text-text-muted mb-2">Closers</div>
+          <div className="text-[10px] small-caps text-text-muted mb-2">Closers{isLow("closer_patterns") && <LowMark />}</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
             {arr(get(p, "closer_patterns", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
           </div>
@@ -139,7 +155,7 @@ function ProfilePage() {
 
       <Section title="Local">
         <div className="py-3 border-b border-border">
-          <div className="text-[10px] small-caps text-text-muted mb-2">Emoji Usage</div>
+          <div className="text-[10px] small-caps text-text-muted mb-2">Emoji Usage{(isLow("emoji_usage") || isLow("emoji_style")) && <LowMark />}</div>
           {p.emoji_usage && <p className="text-sm text-text-primary mb-2">{p.emoji_usage}</p>}
           <div className="flex flex-wrap gap-2 text-xl">
             {arr(get(p, "emoji_style", "examples")).map((e, i) => (
@@ -149,7 +165,7 @@ function ProfilePage() {
         </div>
 
         <div className="py-3 border-b border-border">
-          <div className="text-[10px] small-caps text-text-muted mb-2">Prosodic Compensation</div>
+          <div className="text-[10px] small-caps text-text-muted mb-2">Prosodic Compensation{isLow("prosodic_compensation") && <LowMark />}</div>
           <div className="flex flex-wrap gap-1.5">
             {arr(get(p, "prosodic_compensation", "letter_repetition", "examples")).map((e) => (
               <Chip key={e}>{e}</Chip>
@@ -157,10 +173,10 @@ function ProfilePage() {
           </div>
         </div>
 
-        <ChipsRow label="Filler Phrases" items={arr(get(p, "filler_phrases", "examples"))} />
+        <ChipsRow label="Filler Phrases" items={arr(get(p, "filler_phrases", "examples"))} low={isLow("filler_phrases")} />
 
         <div className="py-3 border-b border-border">
-          <div className="text-[10px] small-caps text-text-muted mb-2">Hedging Language</div>
+          <div className="text-[10px] small-caps text-text-muted mb-2">Hedging Language{isLow("hedging_language") && <LowMark />}</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
             {arr(get(p, "hedging_language", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
           </div>
@@ -170,7 +186,7 @@ function ProfilePage() {
         </div>
 
         <div className="py-3 border-b border-border">
-          <div className="text-[10px] small-caps text-text-muted mb-3">Pronoun Ratio</div>
+          <div className="text-[10px] small-caps text-text-muted mb-3">Pronoun Ratio{isLow("pronoun_ratio") && <LowMark />}</div>
           <div className="grid grid-cols-3 gap-3">
             {([["I", pronI], ["you", pronYou], ["we", pronWe]] as const).map(([k, v]) => (
               <div key={k}>
@@ -185,7 +201,7 @@ function ProfilePage() {
         </div>
 
         <div className="py-3">
-          <div className="text-[10px] small-caps text-text-muted mb-2">Sign-offs</div>
+          <div className="text-[10px] small-caps text-text-muted mb-2">Sign-offs{isLow("sign_offs") && <LowMark />}</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
             {arr(get(p, "sign_offs", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
           </div>
@@ -210,6 +226,18 @@ function ProfilePage() {
           ))}
         </div>
       </div>
+
+      {meta && (
+        <div className="mt-4 border border-border bg-surface p-5">
+          <div className="text-[10px] small-caps text-text-muted mb-2">Extraction Notes</div>
+          {meta.extraction_notes && (
+            <p className="text-xs text-text-secondary leading-relaxed mb-2">{meta.extraction_notes}</p>
+          )}
+          {lowDims.length > 0 && (
+            <div className="text-[11px] font-mono text-warning">~{lowDims.length} dimensions flagged as low confidence</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -230,11 +258,22 @@ function Section({ title, children, defaultOpen = false }: { title: string; chil
   );
 }
 
-function KV({ label, value, mono }: { label: string; value?: string | null; mono?: boolean }) {
+function LowMark() {
+  return (
+    <span
+      className="ml-1 text-warning cursor-help"
+      title="Limited evidence in corpus — may not be reliable."
+    >
+      ~
+    </span>
+  );
+}
+
+function KV({ label, value, mono, low }: { label: string; value?: string | null; mono?: boolean; low?: boolean }) {
   if (!value) return null;
   return (
     <div className="grid grid-cols-[180px_1fr] gap-4 py-2.5 border-b border-border last:border-b-0">
-      <div className="text-[10px] small-caps text-text-muted pt-0.5">{label}</div>
+      <div className="text-[10px] small-caps text-text-muted pt-0.5">{label}{low && <LowMark />}</div>
       <div className={`text-sm text-text-primary ${mono ? "font-mono" : ""}`}>{value}</div>
     </div>
   );
@@ -264,11 +303,11 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ChipsRow({ label, items, tag = false }: { label: string; items: string[]; tag?: boolean }) {
+function ChipsRow({ label, items, tag = false, low }: { label: string; items: string[]; tag?: boolean; low?: boolean }) {
   if (items.length === 0) return null;
   return (
     <div className="py-3 border-b border-border">
-      <div className="text-[10px] small-caps text-text-muted mb-2">{label}</div>
+      <div className="text-[10px] small-caps text-text-muted mb-2">{label}{low && <LowMark />}</div>
       <div className="flex flex-wrap gap-1.5">
         {items.map((i) => tag ? (
           <span key={i} className="inline-block text-xs px-2 py-1 border border-border rounded-sm text-text-primary bg-surface-elevated">{i}</span>
