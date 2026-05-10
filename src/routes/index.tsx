@@ -34,9 +34,9 @@ function Home() {
   const [text, setText] = useState("");
   const [filename, setFilename] = useState<string | null>(null);
   const [name, setName] = useState("Reza — Mixed Corpus");
-  const [source, setSource] = useState("Mixed");
+  const [sources, setSources] = useState<string[]>(["Email", "Slack", "WhatsApp"]);
   const [label, setLabel] = useState("Gmail sent folder");
-  const [lang, setLang] = useState("English");
+  const [langs, setLangs] = useState<string[]>(["English"]);
   const [loading, setLoading] = useState(false);
 
   const onAnalyze = () => {
