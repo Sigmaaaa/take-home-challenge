@@ -4,6 +4,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useStore } from "@/lib/store";
 import { supabase } from "@/lib/supabase";
+import { DeleteCorpusButton } from "@/components/DeleteCorpusButton";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -81,12 +82,15 @@ function ProfilePage() {
             {dateStr && <Pill>analyzed {dateStr}</Pill>}
           </div>
         </div>
-        <Link
-          to="/generate"
-          className="shrink-0 bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] text-white text-sm py-2 px-4 rounded-sm"
-        >
-          Generate Text →
-        </Link>
+        <div className="flex items-center gap-2 shrink-0">
+          <DeleteCorpusButton corpusId={c.id} corpusName={c.name} variant="button" />
+          <Link
+            to="/generate"
+            className="bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] text-white text-sm py-2 px-4 rounded-sm"
+          >
+            Generate Text →
+          </Link>
+        </div>
       </header>
 
       <Section title="Global" defaultOpen>

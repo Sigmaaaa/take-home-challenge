@@ -1,19 +1,9 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
-import { Home, History, Database, User, Wand2, Trash2 } from "lucide-react";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { Home, History, Database, User, Wand2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useStore, storeActions } from "@/lib/store";
-import { supabase, callFn } from "@/lib/supabase";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { supabase } from "@/lib/supabase";
+import { DeleteCorpusButton } from "@/components/DeleteCorpusButton";
 
 const nav = [
   { to: "/", label: "Home", icon: Home },
@@ -31,9 +21,6 @@ export function AppSidebar() {
   const { activeCorpusId } = useStore();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const qc = useQueryClient();
-  const [pending, setPending] = useState<CorpusRow | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   const { data: corpora = [] } = useQuery<CorpusRow[]>({
     queryKey: ["corpora"],
@@ -45,25 +32,6 @@ export function AppSidebar() {
       if (error) throw error;
       return (data ?? []) as CorpusRow[];
     },
-  });
-
-  const deleteMut = useMutation({
-    mutationFn: async (corpus_id: string) => {
-      await callFn("delete-corpus", { corpus_id });
-      return corpus_id;
-    },
-    onSuccess: (corpus_id) => {
-      qc.setQueryData<CorpusRow[]>(["corpora"], (prev) =>
-        (prev ?? []).filter((r) => r.id !== corpus_id),
-      );
-      if (activeCorpusId === corpus_id) {
-        storeActions.setActiveCorpus(null);
-        navigate({ to: "/" });
-      }
-      setPending(null);
-      setError(null);
-    },
-    onError: (e: Error) => setError(e.message),
   });
 
   return (
@@ -132,17 +100,19 @@ export function AppSidebar() {
                     )}
                   </div>
                 </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setError(null);
-                    setPending(c);
-                  }}
-                  aria-label="Delete corpus"
-                  className="absolute top-2 right-2 p-1 rounded-sm text-text-muted opacity-0 group-hover/corpus:opacity-100 hover:text-danger hover:bg-surface-elevated transition-opacity"
+                <div
+                  className={`absolute top-2 right-1.5 transition-opacity ${
+                    active
+                      ? "opacity-70 hover:opacity-100"
+                      : "opacity-0 group-hover/corpus:opacity-70 hover:!opacity-100"
+                  }`}
                 >
-                  <Trash2 className="size-3" />
-                </button>
+                  <DeleteCorpusButton
+                    corpusId={c.id}
+                    corpusName={c.name}
+                    className="p-1 rounded-sm text-text-secondary hover:text-danger hover:bg-surface-elevated transition-colors"
+                  />
+                </div>
               </div>
               {active && (
                 <div className="px-3 pb-2 ml-5 flex flex-col gap-0.5">
@@ -172,35 +142,6 @@ export function AppSidebar() {
       <div className="px-5 py-3 border-t border-border">
         <span className="text-[10px] font-mono text-text-muted">v0.1.0 · build a3f</span>
       </div>
-
-      <AlertDialog open={!!pending} onOpenChange={(o) => !o && !deleteMut.isPending && setPending(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this corpus and all its generations?</AlertDialogTitle>
-            <AlertDialogDescription>
-              {pending ? `"${pending.name}" and its style profile, generations, and scores will be permanently removed.` : ""}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          {error && (
-            <div className="border border-danger/50 bg-danger/10 text-danger text-xs px-3 py-2 rounded-sm font-mono">
-              {error}
-            </div>
-          )}
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteMut.isPending}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={deleteMut.isPending}
-              onClick={(e) => {
-                e.preventDefault();
-                if (pending) deleteMut.mutate(pending.id);
-              }}
-              className="bg-danger text-white hover:bg-danger/90"
-            >
-              {deleteMut.isPending ? "Deleting…" : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </aside>
   );
 }
