@@ -113,7 +113,7 @@ function ProfilePage() {
       <Section title="Global" defaultOpen>
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] small-caps text-text-muted">Formality Score</span>
+            <span className="text-[10px] small-caps text-text-muted">Formality Score{isLow("formality_score") && <LowMark />}</span>
             <span className="font-mono text-sm text-text-primary">{formality.toFixed(2)}</span>
           </div>
           <Bar value={formality} />
