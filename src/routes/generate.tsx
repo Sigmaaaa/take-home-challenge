@@ -110,8 +110,12 @@ function GeneratePage() {
     setTimeout(() => setCopied(false), 1200);
   };
 
-  const formality = Number(profile?.formality_score ?? 0);
-  const cog = profile?.cognitive_spike ?? {};
+  const profileRoot: any = profile ? (profile.profile ?? profile) : null;
+  const g = profileRoot?.global ?? {};
+  const m = profileRoot?.mid_level ?? {};
+  const flat = { ...g, ...m } as any;
+  const formality = Number(g.formality_score ?? profile?.formality_score ?? 0);
+  const cog = profileRoot?.cognitive_spike ?? {};
 
   return (
     <div className="pb-20">
@@ -254,8 +258,8 @@ function GeneratePage() {
                 </div>
               </div>
 
-              {profile.register && <Mini label="Register" value={profile.register} />}
-              {profile.overall_tone && <Mini label="Tone" value={profile.overall_tone} />}
+              {flat.register && <Mini label="Register" value={flat.register} />}
+              {flat.overall_tone && <Mini label="Tone" value={flat.overall_tone} />}
 
               <div className="mt-4 pt-4 border-t border-border space-y-3">
                 {cog.coarse_signal && <CogLine k="COARSE" v={cog.coarse_signal} />}
