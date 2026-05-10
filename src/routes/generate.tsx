@@ -90,9 +90,9 @@ function GeneratePage() {
   const p = corpus.profile;
 
   return (
-    <div className="-mx-4 grid grid-cols-[300px_1fr] gap-6 pb-20">
+    <div className="-mx-4 grid grid-cols-[280px_1fr] gap-8 pb-20">
       {/* Left summary */}
-      <aside className="sticky top-10 self-start border border-border bg-surface p-4 text-sm">
+      <aside className="sticky top-10 self-start border border-border bg-surface p-4 text-sm w-[280px]">
         <div className="text-[10px] small-caps text-text-muted mb-3">Active Profile</div>
         <div className="text-text-primary text-tight mb-4 truncate">{corpus.name}</div>
 
