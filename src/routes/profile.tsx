@@ -165,7 +165,7 @@ function ProfilePage() {
         </div>
 
         <div className="py-3 border-b border-border">
-          <div className="text-[10px] small-caps text-text-muted mb-2">Prosodic Compensation</div>
+          <div className="text-[10px] small-caps text-text-muted mb-2">Prosodic Compensation{isLow("prosodic_compensation") && <LowMark />}</div>
           <div className="flex flex-wrap gap-1.5">
             {arr(get(p, "prosodic_compensation", "letter_repetition", "examples")).map((e) => (
               <Chip key={e}>{e}</Chip>
