@@ -105,6 +105,7 @@ function HistoryPage() {
               <div key={i} className="grid grid-cols-[24px_1fr_140px_110px_80px_90px_24px] gap-4 px-5 py-4 items-center animate-pulse">
                 <div className="size-3 rounded-sm bg-surface-elevated" />
                 <div className="h-3 bg-surface-elevated rounded-sm w-3/4" />
+                <div className="h-3 bg-surface-elevated rounded-sm w-20" />
                 <div className="h-3 bg-surface-elevated rounded-sm w-16" />
                 <div className="h-4 bg-surface-elevated rounded-sm w-12" />
                 <div className="h-3 bg-surface-elevated rounded-sm w-20" />
