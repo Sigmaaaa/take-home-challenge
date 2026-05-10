@@ -75,12 +75,12 @@ function HistoryPage() {
       )}
 
       <div className="border border-border bg-surface">
-        <div className="grid grid-cols-[1fr_120px_90px_100px_24px_24px] gap-4 px-5 py-3 border-b border-border text-[10px] small-caps text-text-muted">
+        <div className="grid grid-cols-[24px_1fr_120px_90px_100px_24px] gap-4 px-5 py-3 border-b border-border text-[10px] small-caps text-text-muted">
+          <div />
           <div>Prompt</div>
           <div>Context</div>
           <div>Score</div>
           <div>Date</div>
-          <div />
           <div />
         </div>
         {isLoading && <div className="px-5 py-8 text-center text-sm text-text-muted">Loading…</div>}
