@@ -143,7 +143,7 @@ function ProfilePage() {
         </div>
 
         <div className="py-3">
-          <div className="text-[10px] small-caps text-text-muted mb-2">Closers</div>
+          <div className="text-[10px] small-caps text-text-muted mb-2">Closers{isLow("closer_patterns") && <LowMark />}</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
             {arr(get(p, "closer_patterns", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
           </div>
