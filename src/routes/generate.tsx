@@ -198,7 +198,7 @@ function GeneratePage() {
               <div className="flex items-center justify-between px-5 py-3 border-b border-border">
                 <span className="text-[10px] small-caps text-text-muted">Generated Output</span>
                 <span className="text-[10px] small-caps px-2 py-0.5 border border-indigo text-indigo rounded-sm">
-                  {result.context}
+                  {resultLabel || result.context}
                 </span>
               </div>
               <pre className="font-mono text-sm text-text-primary p-5 whitespace-pre-wrap leading-relaxed">{result.output}</pre>
