@@ -27,6 +27,11 @@ function Home() {
 
   const loading = extraction.active;
 
+  const messageCount = text.trim()
+    ? text.split(/^---\s*$/m).map((s) => s.trim()).filter(Boolean).length
+    : 0;
+  const tooSmall = messageCount > 0 && messageCount < 5;
+
   // Surface async extraction errors from the global store
   useEffect(() => {
     if (extraction.error) setError(extraction.error);
