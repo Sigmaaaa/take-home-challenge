@@ -258,8 +258,8 @@ function GeneratePage() {
                 </div>
               </div>
 
-              {profile.register && <Mini label="Register" value={profile.register} />}
-              {profile.overall_tone && <Mini label="Tone" value={profile.overall_tone} />}
+              {flat.register && <Mini label="Register" value={flat.register} />}
+              {flat.overall_tone && <Mini label="Tone" value={flat.overall_tone} />}
 
               <div className="mt-4 pt-4 border-t border-border space-y-3">
                 {cog.coarse_signal && <CogLine k="COARSE" v={cog.coarse_signal} />}
