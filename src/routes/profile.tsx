@@ -133,7 +133,7 @@ function ProfilePage() {
         <KV label="Follow-up Behavior" value={p.follow_up_behavior} low={isLow("follow_up_behavior")} />
 
         <div className="py-3 border-b border-border">
-          <div className="text-[10px] small-caps text-text-muted mb-2">Openers</div>
+          <div className="text-[10px] small-caps text-text-muted mb-2">Openers{isLow("opener_patterns") && <LowMark />}</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
             {arr(get(p, "opener_patterns", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
           </div>
