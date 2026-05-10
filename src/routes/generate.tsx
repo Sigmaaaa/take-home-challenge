@@ -110,8 +110,12 @@ function GeneratePage() {
     setTimeout(() => setCopied(false), 1200);
   };
 
-  const formality = Number(profile?.formality_score ?? 0);
-  const cog = profile?.cognitive_spike ?? {};
+  const profileRoot: any = profile ? (profile.profile ?? profile) : null;
+  const g = profileRoot?.global ?? {};
+  const m = profileRoot?.mid_level ?? {};
+  const flat = { ...g, ...m } as any;
+  const formality = Number(g.formality_score ?? profile?.formality_score ?? 0);
+  const cog = profileRoot?.cognitive_spike ?? {};
 
   return (
     <div className="pb-20">
