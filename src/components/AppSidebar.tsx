@@ -66,7 +66,17 @@ export function AppSidebar() {
         <div className="text-[10px] small-caps text-text-muted mb-2">Corpora</div>
       </div>
       <div className="px-2 flex-1 overflow-y-auto scrollbar-thin">
-        {corpora.length === 0 && (
+        {corporaLoading && (
+          <div className="px-3 space-y-2">
+            {[0, 1].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="h-3 bg-surface-elevated rounded-sm w-3/4 mb-1.5" />
+                <div className="h-2 bg-surface-elevated/60 rounded-sm w-1/2 ml-5" />
+              </div>
+            ))}
+          </div>
+        )}
+        {!corporaLoading && corpora.length === 0 && (
           <div className="px-3 text-xs text-text-muted">No corpora yet</div>
         )}
         {corpora.map((c) => {
