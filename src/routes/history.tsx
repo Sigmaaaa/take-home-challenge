@@ -42,8 +42,23 @@ function HistoryPage() {
     },
   });
 
-  const filters = ["All", ...Array.from(new Set(rows.map((r) => r.context_type).filter(Boolean) as string[]))];
-  const filtered = rows.filter((g) => filter === "All" || g.context_type === filter);
+  const shortLabel = (ct: string) => {
+    const s = ct.toLowerCase();
+    if (s.includes("email")) return "Email";
+    if (s.includes("slack")) return "Slack";
+    if (s.includes("whatsapp") || s.includes("text")) return "Text";
+    return ct.length > 12 ? ct.slice(0, 12) + "…" : ct;
+  };
+  const rawTypes = Array.from(new Set(rows.map((r) => r.context_type).filter(Boolean) as string[]));
+  const labelMap = new Map<string, string[]>();
+  rawTypes.forEach((ct) => {
+    const lbl = shortLabel(ct);
+    labelMap.set(lbl, [...(labelMap.get(lbl) ?? []), ct]);
+  });
+  const filters = ["All", ...labelMap.keys()];
+  const filtered = rows.filter(
+    (g) => filter === "All" || (g.context_type && labelMap.get(filter)?.includes(g.context_type)),
+  );
 
   return (
     <div className="pb-20">
