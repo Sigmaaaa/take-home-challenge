@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { AppSidebar } from "@/components/AppSidebar";
+import { GlobalExtractionLoader } from "@/components/GlobalExtractionLoader";
 
 function NotFoundComponent() {
   return (
@@ -104,6 +105,7 @@ function RootComponent() {
           </div>
         </main>
       </div>
+      <GlobalExtractionLoader />
     </QueryClientProvider>
   );
 }

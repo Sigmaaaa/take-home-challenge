@@ -92,7 +92,7 @@ export function TerminalLoader({ lines, charCount, apiDone, corpusName, onDone }
       <button
         type="button"
         onClick={showCompletion ? undefined : expand}
-        className="fixed bottom-5 right-5 z-50 w-[320px] text-left bg-[#1A1A1A] border border-border border-l-2 border-l-indigo px-3 py-2.5 font-mono text-xs animate-[fade-in_0.3s_ease-out] hover:border-l-indigo hover:border-border/80 transition-colors"
+        className="fixed top-5 right-5 z-50 w-[320px] text-left bg-[#1A1A1A] border border-border border-l-2 border-l-indigo px-3 py-2.5 font-mono text-xs animate-[fade-in_0.3s_ease-out] hover:border-l-indigo hover:border-border/80 transition-colors"
       >
         {showCompletion ? (
           <div className="text-indigo flex items-center gap-2">
