@@ -98,9 +98,28 @@ function HistoryPage() {
           <div>Date</div>
           <div />
         </div>
-        {isLoading && <div className="px-5 py-8 text-center text-sm text-text-muted">Loading…</div>}
+        {isLoading && (
+          <div className="divide-y divide-border">
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="grid grid-cols-[24px_1fr_120px_90px_100px_24px] gap-4 px-5 py-4 items-center animate-pulse">
+                <div className="size-3 rounded-sm bg-surface-elevated" />
+                <div className="h-3 bg-surface-elevated rounded-sm w-3/4" />
+                <div className="h-3 bg-surface-elevated rounded-sm w-16" />
+                <div className="h-4 bg-surface-elevated rounded-sm w-12" />
+                <div className="h-3 bg-surface-elevated rounded-sm w-20" />
+                <div className="size-3 rounded-sm bg-surface-elevated" />
+              </div>
+            ))}
+            <div className="px-5 py-3 text-center text-[11px] font-mono text-text-muted">
+              Fetching from database…
+            </div>
+          </div>
+        )}
         {!isLoading && filtered.length === 0 && (
-          <div className="px-5 py-8 text-center text-sm text-text-muted">No generations yet.</div>
+          <div className="px-5 py-12 text-center">
+            <div className="text-sm text-text-primary mb-1">No generations yet</div>
+            <div className="text-xs text-text-muted">Generate text from a corpus to see it here.</div>
+          </div>
         )}
         {filtered.map((g) => (
           <Row key={g.id} g={g} open={expanded === g.id} onToggle={() => setExpanded(expanded === g.id ? null : g.id)} />
