@@ -91,12 +91,13 @@ function GeneratePage() {
 
   return (
     <div className="pb-20">
-      <div className="grid grid-cols-[1fr_280px] gap-8 mb-6 items-stretch">
-        {/* Left: heading + context */}
-        <div className="min-w-0 flex flex-col">
+      <div className="grid grid-cols-[1fr_280px] gap-8 items-start">
+        {/* Left: heading + context + prompt + output */}
+        <div className="min-w-0">
           <h1 className="text-[44px] text-tighter text-text-primary mb-6 leading-none">Generate</h1>
+
           <label className="block text-[10px] small-caps text-text-muted mb-1.5">Context</label>
-          <div className="flex flex-wrap gap-2 mb-3">
+          <div className="flex flex-wrap gap-2">
             {sourcePills.map((c) => {
               const active = !customMode && c === selected;
               return (
@@ -131,13 +132,42 @@ function GeneratePage() {
               value={customText}
               onChange={(e) => setCustomText(e.target.value)}
               placeholder="describe the context (e.g. LinkedIn DM to a former colleague)"
-              className="w-full bg-surface border border-indigo p-2.5 font-mono text-xs text-text-primary placeholder:text-text-muted focus:outline-none"
+              className="w-full mt-3 bg-surface border border-indigo p-2.5 font-mono text-xs text-text-primary placeholder:text-text-muted focus:outline-none"
             />
+          )}
+
+          <label className="block text-[10px] small-caps text-text-muted mb-1.5 mt-5">Writing Prompt</label>
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="e.g. Write a follow-up email to a recruiter after a first interview"
+            className="w-full min-h-[200px] bg-surface border border-border p-3 font-mono text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-indigo resize-y"
+          />
+
+          <button
+            onClick={onGenerate}
+            className="mt-4 w-full bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] text-white text-base py-4 rounded-sm font-medium transition-all"
+          >
+            Generate
+          </button>
+
+          {/* Placeholder output + score before generation */}
+          {phase === "idle" && (
+            <>
+              <div className="mt-6 border border-dashed border-border bg-surface/40 p-8">
+                <div className="text-[10px] small-caps text-text-muted mb-3">Output</div>
+                <div className="text-sm text-text-muted font-mono">Generated text will appear here...</div>
+              </div>
+              <div className="mt-3 border border-dashed border-border bg-surface/40 p-8 text-center">
+                <div className="font-mono text-6xl text-text-muted">— —</div>
+                <div className="text-[10px] small-caps text-text-muted mt-2">Style Match Score</div>
+              </div>
+            </>
           )}
         </div>
 
-        {/* Right: active profile */}
-        <aside className="border border-border bg-surface p-4 text-sm w-[280px]">
+        {/* Right: active profile (sticky) */}
+        <aside className="sticky top-6 self-start border border-border bg-surface p-4 text-sm w-[280px]">
           <div className="text-[10px] small-caps text-text-muted mb-3">Active Profile</div>
           <div className="text-text-primary text-tight mb-4 truncate">{corpus.name}</div>
 
@@ -161,30 +191,6 @@ function GeneratePage() {
           </div>
         </aside>
       </div>
-
-      <div className="min-w-0">
-        <label className="block text-[10px] small-caps text-text-muted mb-1.5">Writing Prompt</label>
-        <textarea
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="e.g. Write a follow-up email to a recruiter after a first interview"
-          className="w-full min-h-[140px] bg-surface border border-border p-3 font-mono text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-indigo resize-y"
-        />
-
-        <button
-          onClick={onGenerate}
-          className="mt-4 w-full bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] text-white text-base py-4 rounded-sm font-medium transition-all"
-        >
-          Generate
-        </button>
-
-        {/* Placeholder output area before generation */}
-        {phase === "idle" && (
-          <div className="mt-6 border border-dashed border-border bg-surface/40 p-10 text-center">
-            <div className="text-[10px] small-caps text-text-muted mb-2">Output</div>
-            <div className="text-sm text-text-muted font-mono">Your generated text will appear here.</div>
-          </div>
-        )}
 
         {/* Loading */}
         {phase === "loading" && (
