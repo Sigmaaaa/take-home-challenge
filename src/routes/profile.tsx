@@ -176,7 +176,7 @@ function ProfilePage() {
         <ChipsRow label="Filler Phrases" items={arr(get(p, "filler_phrases", "examples"))} low={isLow("filler_phrases")} />
 
         <div className="py-3 border-b border-border">
-          <div className="text-[10px] small-caps text-text-muted mb-2">Hedging Language</div>
+          <div className="text-[10px] small-caps text-text-muted mb-2">Hedging Language{isLow("hedging_language") && <LowMark />}</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
             {arr(get(p, "hedging_language", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
           </div>
