@@ -291,11 +291,11 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ChipsRow({ label, items, tag = false }: { label: string; items: string[]; tag?: boolean }) {
+function ChipsRow({ label, items, tag = false, low }: { label: string; items: string[]; tag?: boolean; low?: boolean }) {
   if (items.length === 0) return null;
   return (
     <div className="py-3 border-b border-border">
-      <div className="text-[10px] small-caps text-text-muted mb-2">{label}</div>
+      <div className="text-[10px] small-caps text-text-muted mb-2">{label}{low && <LowMark />}</div>
       <div className="flex flex-wrap gap-1.5">
         {items.map((i) => tag ? (
           <span key={i} className="inline-block text-xs px-2 py-1 border border-border rounded-sm text-text-primary bg-surface-elevated">{i}</span>
