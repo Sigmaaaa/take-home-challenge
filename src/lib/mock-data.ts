@@ -113,11 +113,11 @@ export const mockProfile: StyleProfile = {
   },
   cognitive: {
     coarse:
-      "Other-oriented sense-maker. Treats conversation as joint inquiry rather than information transfer. Will sacrifice clarity for warmth and rarely opens with assertion.",
+      "Other-oriented sense-maker. Treats conversation as joint inquiry rather than information transfer.",
     mid:
-      "Builds arguments through accumulation — small concessions, mirrored phrasing, then a soft pivot. Hedges most strongly right before the actual point, signaling cognitive cost.",
+      "Builds arguments through accumulation. Hedges most strongly right before the actual point.",
     fine:
-      "Lowercase entries, em-dashes as breath marks, double exclamation as a closing release valve. Repeats vowels when emotionally tuned in. Pronouns skew 'you' over 'I' even in self-disclosure.",
+      "Lowercase entries, double exclamation as closing release valve. Pronouns skew 'you' over 'I'.",
   },
 };
 
