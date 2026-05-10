@@ -88,7 +88,7 @@ function Home() {
       {loading && (
         <TerminalLoader
           lines={EXTRACTION_LINES}
-          intervalMs={1500}
+          charCount={text.length}
           apiDone={apiDone}
           onDone={onLoaderDone}
         />

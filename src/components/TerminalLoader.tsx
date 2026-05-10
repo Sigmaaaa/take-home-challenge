@@ -1,34 +1,53 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 interface Props {
   lines: string[];
-  intervalMs?: number;
+  charCount: number;
   apiDone: boolean;
   onDone?: () => void;
 }
 
-export function TerminalLoader({ lines, intervalMs = 1500, apiDone, onDone }: Props) {
+const WAITING_MESSAGES = [
+  "Cross-referencing patterns...",
+  "Validating style hierarchy...",
+  "Finalizing fingerprint...",
+];
+
+export function TerminalLoader({ lines, charCount, apiDone, onDone }: Props) {
+  const lineInterval = useMemo(() => {
+    const estimatedSeconds = Math.max(18, Math.floor(charCount / 2500));
+    return Math.floor((estimatedSeconds * 0.8 * 1000) / lines.length);
+  }, [charCount, lines.length]);
+
   const [shown, setShown] = useState(0);
   const [animationDone, setAnimationDone] = useState(false);
+  const [waitIdx, setWaitIdx] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
 
-  // Advance lines on cadence
   useEffect(() => {
     if (shown >= lines.length - 1) {
       setAnimationDone(true);
       return;
     }
-    const t = setTimeout(() => setShown((s) => s + 1), intervalMs);
+    const t = setTimeout(() => setShown((s) => s + 1), lineInterval);
     return () => clearTimeout(t);
-  }, [shown, lines.length, intervalMs]);
+  }, [shown, lines.length, lineInterval]);
 
-  // When both finished, show completion line, then fade
+  // Cycle waiting messages while animation done but API not done
+  useEffect(() => {
+    if (!animationDone || apiDone) return;
+    const t = setInterval(() => {
+      setWaitIdx((i) => (i + 1) % WAITING_MESSAGES.length);
+    }, 2000);
+    return () => clearInterval(t);
+  }, [animationDone, apiDone]);
+
   useEffect(() => {
     if (!(animationDone && apiDone)) return;
     setShowCompletion(true);
     const t1 = setTimeout(() => setFadeOut(true), 600);
-    const t2 = setTimeout(() => onDone?.(), 600 + 400);
+    const t2 = setTimeout(() => onDone?.(), 600 + 500);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [animationDone, apiDone, onDone]);
 
@@ -36,7 +55,7 @@ export function TerminalLoader({ lines, intervalMs = 1500, apiDone, onDone }: Pr
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-background flex items-start justify-center pt-[20vh] px-6 transition-opacity duration-[400ms]"
+      className="fixed inset-0 z-50 bg-background flex items-start justify-center pt-[20vh] px-6 transition-opacity duration-[500ms]"
       style={{ opacity: fadeOut ? 0 : 1 }}
     >
       <div className="absolute top-4 left-5 font-mono text-[11px] small-caps text-text-muted">
@@ -56,8 +75,8 @@ export function TerminalLoader({ lines, intervalMs = 1500, apiDone, onDone }: Pr
           );
         })}
         {waitingForApi && (
-          <div className="text-text-primary blink-cursor">
-            <span className="text-indigo mr-2">›</span>
+          <div key={waitIdx} className="text-indigo blink-cursor mt-1">
+            <span className="mr-2">›</span>{WAITING_MESSAGES[waitIdx]}
           </div>
         )}
         {showCompletion && (
