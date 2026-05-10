@@ -172,10 +172,18 @@ function GeneratePage() {
 
         <button
           onClick={onGenerate}
-          className="mt-3 w-full bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] text-white text-sm py-3 rounded-sm"
+          className="mt-4 w-full bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] text-white text-base py-4 rounded-sm font-medium transition-all"
         >
           Generate
         </button>
+
+        {/* Placeholder output area before generation */}
+        {phase === "idle" && (
+          <div className="mt-6 border border-dashed border-border bg-surface/40 p-10 text-center">
+            <div className="text-[10px] small-caps text-text-muted mb-2">Output</div>
+            <div className="text-sm text-text-muted font-mono">Your generated text will appear here.</div>
+          </div>
+        )}
 
         {/* Loading */}
         {phase === "loading" && (
