@@ -117,9 +117,7 @@ function Row({ g, open, onToggle }: { g: GenRow; open: boolean; onToggle: () => 
         onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
         className="group w-full grid grid-cols-[24px_1fr_120px_90px_100px_24px] gap-4 px-5 py-3 border-b border-border text-left hover:bg-surface-elevated transition-colors items-center cursor-pointer"
       >
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <DeleteGenerationButton generationId={g.id} />
-        </div>
+        <DeleteGenerationButton generationId={g.id} />
         <div className="text-sm text-text-primary truncate">
           {g.prompt.slice(0, 60)}{g.prompt.length > 60 ? "…" : ""}
         </div>
