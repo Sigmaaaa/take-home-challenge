@@ -71,7 +71,8 @@ function ProfilePage() {
   const dateStr = c.created_at ? new Date(c.created_at).toISOString().slice(0, 10) : "";
 
   return (
-    <div className="pb-20">
+    <div className="pb-20 animate-[fadeIn_400ms_ease-out_both]">
+      <style>{`@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }`}</style>
       <header className="flex items-start justify-between gap-6 mb-8">
         <div>
           <h1 className="text-[32px] text-tighter text-text-primary leading-[1.1]">{c.name}</h1>
