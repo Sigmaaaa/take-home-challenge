@@ -177,6 +177,13 @@ function GeneratePage() {
           Generate
         </button>
 
+        {/* Empty placeholder */}
+        {phase === "idle" && (
+          <div className="mt-6 border border-dashed border-border bg-surface/40 p-10 text-center">
+            <p className="text-sm text-text-muted">Your generated text will appear here.</p>
+          </div>
+        )}
+
         {/* Loading */}
         {phase === "loading" && (
           <div className="mt-6 border border-border bg-surface p-5 font-mono text-sm">
