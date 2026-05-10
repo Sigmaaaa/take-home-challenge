@@ -50,15 +50,19 @@ function ProfilePage() {
   );
 
   const c = data.corpus;
-  const p = data.profile;
+  const root = (data.profile?.profile ?? data.profile) as any;
+  const g = root?.global ?? {};
+  const m = root?.mid_level ?? {};
+  const l = root?.local ?? {};
+  const p = { ...g, ...m, ...l } as any;
 
   // Defensive accessors — schema is JSON-ish per spec
   const get = (obj: any, ...keys: string[]) => keys.reduce((acc, k) => (acc == null ? acc : acc[k]), obj);
   const arr = (v: any): string[] => Array.isArray(v) ? v.filter((x) => typeof x === "string" || typeof x === "number").map(String) : [];
 
-  const formality = Number(p.formality_score ?? 0);
-  const cog = p.cognitive_spike ?? {};
-  const pron = p.pronoun_ratio ?? {};
+  const formality = Number(g.formality_score ?? 0);
+  const cog = root?.cognitive_spike ?? {};
+  const pron = l.pronoun_ratio ?? {};
   const pronI = Number(pron.I ?? pron.i ?? pron.first_person ?? 0);
   const pronYou = Number(pron.you ?? pron.second_person ?? 0);
   const pronWe = Number(pron.we ?? pron.first_person_plural ?? 0);
