@@ -24,6 +24,7 @@ function Home() {
   const [label, setLabel] = useState("");
   const [langs, setLangs] = useState<string[]>(["English"]);
   const [error, setError] = useState<string | null>(null);
+  const [consent, setConsent] = useState(false);
 
   const loading = extraction.active;
 
@@ -153,10 +154,25 @@ function Home() {
             </div>
           )}
 
+          <div className="mt-5">
+            <label className="flex items-start gap-2 cursor-pointer text-xs text-text-secondary leading-relaxed">
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+                className="mt-0.5 size-3.5 accent-[var(--indigo)] cursor-pointer"
+              />
+              <span>I confirm this is my own writing and I consent to it being processed by Claude (Anthropic's AI).</span>
+            </label>
+            <p className="mt-2 ml-[22px] text-[11px] text-text-muted leading-relaxed">
+              Your text is sent to Anthropic's API for analysis and deleted immediately after your style profile is extracted. Only the profile is stored.
+            </p>
+          </div>
+
           <button
             onClick={onAnalyze}
-            disabled={loading || tooSmall}
-            className="mt-5 w-full bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] disabled:opacity-50 text-white text-sm font-medium py-3 rounded-sm transition-colors"
+            disabled={loading || tooSmall || !consent}
+            className="mt-5 w-full bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] disabled:opacity-50 disabled:hover:shadow-none disabled:cursor-not-allowed text-white text-sm font-medium py-3 rounded-sm transition-colors"
           >
             Analyze Style →
           </button>
