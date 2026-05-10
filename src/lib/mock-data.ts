@@ -45,6 +45,7 @@ export interface Corpus {
   id: string;
   name: string;
   source_type: SourceType;
+  sources: string[];
   source_label: string;
   language: string;
   message_count: number;
