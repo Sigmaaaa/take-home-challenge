@@ -173,7 +173,7 @@ function ProfilePage() {
           </div>
         </div>
 
-        <ChipsRow label="Filler Phrases" items={arr(get(p, "filler_phrases", "examples"))} />
+        <ChipsRow label="Filler Phrases" items={arr(get(p, "filler_phrases", "examples"))} low={isLow("filler_phrases")} />
 
         <div className="py-3 border-b border-border">
           <div className="text-[10px] small-caps text-text-muted mb-2">Hedging Language</div>
