@@ -39,9 +39,8 @@ function Home() {
   const [label, setLabel] = useState("");
   const [langs, setLangs] = useState<string[]>(["English"]);
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+  const [apiDone, setApiDone] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
 
   const onAnalyze = async () => {
