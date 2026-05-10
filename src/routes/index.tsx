@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Upload, FileText } from "lucide-react";
 import { TerminalLoader } from "@/components/TerminalLoader";
+import { PillMultiSelect } from "@/components/PillMultiSelect";
 import { storeActions } from "@/lib/store";
 import { mockCorpus } from "@/lib/mock-data";
 
