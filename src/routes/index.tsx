@@ -24,6 +24,7 @@ function Home() {
   const [label, setLabel] = useState("");
   const [langs, setLangs] = useState<string[]>(["English"]);
   const [error, setError] = useState<string | null>(null);
+  const [consent, setConsent] = useState(false);
 
   const loading = extraction.active;
 
