@@ -155,7 +155,7 @@ function ProfilePage() {
 
       <Section title="Local">
         <div className="py-3 border-b border-border">
-          <div className="text-[10px] small-caps text-text-muted mb-2">Emoji Usage</div>
+          <div className="text-[10px] small-caps text-text-muted mb-2">Emoji Usage{(isLow("emoji_usage") || isLow("emoji_style")) && <LowMark />}</div>
           {p.emoji_usage && <p className="text-sm text-text-primary mb-2">{p.emoji_usage}</p>}
           <div className="flex flex-wrap gap-2 text-xl">
             {arr(get(p, "emoji_style", "examples")).map((e, i) => (
