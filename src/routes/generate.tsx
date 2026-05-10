@@ -90,84 +90,86 @@ function GeneratePage() {
   const p = corpus.profile;
 
   return (
-    <div className="-mx-4 grid grid-cols-[280px_1fr] gap-8 pb-20">
-      {/* Left summary */}
-      <aside className="sticky top-10 self-start border border-border bg-surface p-4 text-sm w-[280px]">
-        <div className="text-[10px] small-caps text-text-muted mb-3">Active Profile</div>
-        <div className="text-text-primary text-tight mb-4 truncate">{corpus.name}</div>
+    <div className="pb-20">
+      <h1 className="text-[44px] text-tighter text-text-primary mb-8 leading-none">Generate</h1>
 
-        <div className="mb-4">
-          <div className="flex justify-between mb-1.5">
-            <span className="text-[10px] small-caps text-text-muted">Formality</span>
-            <span className="font-mono text-xs text-text-primary">{p.global.formality.toFixed(2)}</span>
+      <div className="grid grid-cols-[1fr_280px] gap-8 mb-6 items-start">
+        {/* Left: context */}
+        <div className="min-w-0">
+          <label className="block text-[10px] small-caps text-text-muted mb-1.5">Context</label>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {sourcePills.map((c) => {
+              const active = !customMode && c === selected;
+              return (
+                <button
+                  key={c}
+                  onClick={() => { setCustomMode(false); setSelected(c); }}
+                  className={`px-3.5 py-1.5 text-xs rounded-sm border transition-colors ${
+                    active
+                      ? "bg-indigo border-indigo text-white"
+                      : "border-border text-text-secondary hover:text-text-primary hover:border-text-muted"
+                  }`}
+                >
+                  {c}
+                </button>
+              );
+            })}
+            <button
+              onClick={() => setCustomMode(true)}
+              className={`px-3.5 py-1.5 text-xs rounded-sm border transition-colors ${
+                customMode
+                  ? "bg-indigo border-indigo text-white"
+                  : "border-dashed border-border text-text-secondary hover:text-text-primary hover:border-text-muted"
+              }`}
+            >
+              + Custom
+            </button>
           </div>
-          <div className="h-1 bg-surface-elevated">
-            <div className="h-full bg-indigo" style={{ width: `${p.global.formality * 100}%` }} />
-          </div>
+
+          {customMode && (
+            <input
+              autoFocus
+              value={customText}
+              onChange={(e) => setCustomText(e.target.value)}
+              placeholder="describe the context (e.g. LinkedIn DM to a former colleague)"
+              className="w-full bg-surface border border-indigo p-2.5 font-mono text-xs text-text-primary placeholder:text-text-muted focus:outline-none"
+            />
+          )}
         </div>
 
-        <Mini label="Register" value={p.global.register} />
-        <Mini label="Tone" value={p.global.overall_tone} />
+        {/* Right: active profile */}
+        <aside className="border border-border bg-surface p-4 text-sm w-[280px]">
+          <div className="text-[10px] small-caps text-text-muted mb-3">Active Profile</div>
+          <div className="text-text-primary text-tight mb-4 truncate">{corpus.name}</div>
 
-        <div className="mt-4 pt-4 border-t border-border space-y-3">
-          <CogLine k="COARSE" v={p.cognitive.coarse} />
-          <CogLine k="MID" v={p.cognitive.mid} />
-          <CogLine k="FINE" v={p.cognitive.fine} />
-        </div>
-      </aside>
+          <div className="mb-4">
+            <div className="flex justify-between mb-1.5">
+              <span className="text-[10px] small-caps text-text-muted">Formality</span>
+              <span className="font-mono text-xs text-text-primary">{p.global.formality.toFixed(2)}</span>
+            </div>
+            <div className="h-1 bg-surface-elevated">
+              <div className="h-full bg-indigo" style={{ width: `${p.global.formality * 100}%` }} />
+            </div>
+          </div>
 
-      {/* Right pane */}
+          <Mini label="Register" value={p.global.register} />
+          <Mini label="Tone" value={p.global.overall_tone} />
+
+          <div className="mt-4 pt-4 border-t border-border space-y-3">
+            <CogLine k="COARSE" v={p.cognitive.coarse} />
+            <CogLine k="MID" v={p.cognitive.mid} />
+            <CogLine k="FINE" v={p.cognitive.fine} />
+          </div>
+        </aside>
+      </div>
+
       <div className="min-w-0">
-        <h1 className="text-[44px] text-tighter text-text-primary mb-8 leading-none">Generate</h1>
-
-        {/* Context pills */}
-        <label className="block text-[10px] small-caps text-text-muted mb-1.5">Context</label>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {sourcePills.map((c) => {
-            const active = !customMode && c === selected;
-            return (
-              <button
-                key={c}
-                onClick={() => { setCustomMode(false); setSelected(c); }}
-                className={`px-3.5 py-1.5 text-xs rounded-sm border transition-colors ${
-                  active
-                    ? "bg-indigo border-indigo text-white"
-                    : "border-border text-text-secondary hover:text-text-primary hover:border-text-muted"
-                }`}
-              >
-                {c}
-              </button>
-            );
-          })}
-          <button
-            onClick={() => setCustomMode(true)}
-            className={`px-3.5 py-1.5 text-xs rounded-sm border transition-colors ${
-              customMode
-                ? "bg-indigo border-indigo text-white"
-                : "border-dashed border-border text-text-secondary hover:text-text-primary hover:border-text-muted"
-            }`}
-          >
-            + Custom
-          </button>
-        </div>
-
-        {customMode && (
-          <input
-            autoFocus
-            value={customText}
-            onChange={(e) => setCustomText(e.target.value)}
-            placeholder="describe the context (e.g. LinkedIn DM to a former colleague)"
-            className="w-full mb-5 bg-surface border border-indigo p-2.5 font-mono text-xs text-text-primary placeholder:text-text-muted focus:outline-none"
-          />
-        )}
-        {!customMode && <div className="mb-5" />}
-
         <label className="block text-[10px] small-caps text-text-muted mb-1.5">Writing Prompt</label>
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="e.g. Write a follow-up email to a recruiter after a first interview"
-          className="w-full min-h-[120px] bg-surface border border-border p-3 font-mono text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-indigo resize-y"
+          className="w-full min-h-[140px] bg-surface border border-border p-3 font-mono text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-indigo resize-y"
         />
 
         <button
