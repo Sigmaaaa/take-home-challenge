@@ -37,6 +37,7 @@
   --color-warning: var(--warning);
   --color-danger: var(--danger);
   --color-indigo: var(--indigo);
+  --color-indigo-hover: var(--indigo-hover);
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
@@ -52,6 +53,7 @@
   --text-secondary: #888888;
   --text-muted: #444444;
   --indigo: #6366F1;
+  --indigo-hover: #818CF8;
   --accent: #6366F1;
   --accent-foreground: #FFFFFF;
   --success: #10B981;

@@ -176,7 +176,7 @@ function Home() {
 
           <button
             onClick={onAnalyze}
-            className="mt-5 w-full bg-indigo hover:bg-indigo/90 text-white text-sm font-medium py-3 rounded-sm transition-colors"
+            className="mt-5 w-full bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] text-white text-sm font-medium py-3 rounded-sm transition-colors"
           >
             Analyze Style →
           </button>
