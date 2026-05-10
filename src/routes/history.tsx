@@ -134,7 +134,7 @@ function Row({ g, open, onToggle }: { g: GenRow; open: boolean; onToggle: () => 
       >
         <DeleteGenerationButton generationId={g.id} />
         <div className="text-sm text-text-primary truncate">
-          {g.prompt.slice(0, 60)}{g.prompt.length > 60 ? "…" : ""}
+          {g.prompt.slice(0, 80)}{g.prompt.length > 80 ? "…" : ""}
         </div>
         <div className="text-xs text-text-secondary">{g.context_type || "—"}</div>
         <div>
@@ -148,28 +148,42 @@ function Row({ g, open, onToggle }: { g: GenRow; open: boolean; onToggle: () => 
         </div>
       </div>
       {open && (
-        <div className="px-5 py-5 border-b border-border bg-background">
-          <div className="border border-border bg-surface mb-4">
-            <pre className="font-mono text-sm text-text-primary p-4 whitespace-pre-wrap leading-relaxed">{output}</pre>
+        <div className="px-5 py-5 border-b border-border bg-background space-y-5">
+          <div>
+            <div className="text-[10px] small-caps text-text-muted mb-2">Prompt</div>
+            <div
+              className="border-l-[3px] border-indigo bg-[#1A1A1A] px-4 py-3 italic text-sm text-text-secondary whitespace-pre-wrap leading-relaxed"
+            >
+              {g.prompt}
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            {[
-              { k: "Embedding", v: embed },
-              { k: "Programmatic", v: prog },
-              { k: "LLM Judge", v: judge },
-            ].map((r) => (
-              <div key={r.k}>
-                <div className="flex justify-between text-xs mb-1">
-                  <span className="text-text-secondary">{r.k}</span>
-                  <span className="font-mono text-text-primary">{(r.v * 100).toFixed(0)}%</span>
-                </div>
-                <div className="h-1 bg-surface-elevated">
-                  <div className="h-full bg-indigo" style={{ width: `${r.v * 100}%` }} />
-                </div>
-              </div>
-            ))}
+          <div>
+            <div className="text-[10px] small-caps text-text-muted mb-2">Output</div>
+            <div className="border border-border bg-surface">
+              <pre className="font-mono text-sm text-text-primary p-4 whitespace-pre-wrap leading-relaxed">{output}</pre>
+            </div>
           </div>
-          {reasoning && <p className="text-xs text-text-secondary italic">{reasoning}</p>}
+          <div>
+            <div className="text-[10px] small-caps text-text-muted mb-2">Score Breakdown</div>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              {[
+                { k: "Embedding", v: embed },
+                { k: "Programmatic", v: prog },
+                { k: "LLM Judge", v: judge },
+              ].map((r) => (
+                <div key={r.k}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-text-secondary">{r.k}</span>
+                    <span className="font-mono text-text-primary">{(r.v * 100).toFixed(0)}%</span>
+                  </div>
+                  <div className="h-1 bg-surface-elevated">
+                    <div className="h-full bg-indigo" style={{ width: `${r.v * 100}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            {reasoning && <p className="text-xs text-text-secondary italic">{reasoning}</p>}
+          </div>
         </div>
       )}
     </>
