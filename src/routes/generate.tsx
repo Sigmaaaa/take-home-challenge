@@ -14,7 +14,21 @@ export const Route = createFileRoute("/generate")({
   }),
 });
 
-const CONTEXTS: ContextType[] = ["Formal Email", "Slack", "Text"];
+const CONTEXT_HINTS: Record<string, ContextType> = {
+  Email: "Formal Email",
+  Gmail: "Formal Email",
+  Slack: "Slack",
+  WhatsApp: "Text",
+  SMS: "Text",
+  Text: "Text",
+};
+
+function inferContextType(label: string): ContextType {
+  for (const [k, v] of Object.entries(CONTEXT_HINTS)) {
+    if (label.toLowerCase().includes(k.toLowerCase())) return v;
+  }
+  return "Text";
+}
 
 const LOADER_LINES = [
   "Internalizing style profile...",
@@ -25,11 +39,17 @@ const LOADER_LINES = [
 function GeneratePage() {
   const { corpora, activeCorpusId } = useStore();
   const corpus = corpora.find((c) => c.id === activeCorpusId) ?? corpora[0];
-  const [ctx, setCtx] = useState<ContextType>("Formal Email");
+  const sourcePills = corpus?.sources ?? [];
+  const [selected, setSelected] = useState<string>(sourcePills[0] ?? "Custom");
+  const [customMode, setCustomMode] = useState(false);
+  const [customText, setCustomText] = useState("");
+  const activeContextLabel = customMode ? customText.trim() || "Custom" : selected;
+  const ctx: ContextType = inferContextType(activeContextLabel);
   const [prompt, setPrompt] = useState("Write a follow-up email to a recruiter after a first interview");
   const [phase, setPhase] = useState<"idle" | "loading" | "result">("idle");
   const [step, setStep] = useState(0);
   const [result, setResult] = useState<Generation | null>(null);
+  const [resultLabel, setResultLabel] = useState<string>("");
   const [copied, setCopied] = useState(false);
 
   if (!corpus) {
@@ -51,6 +71,7 @@ function GeneratePage() {
       const base = mockGenerations.find((g) => g.context === ctx) ?? mockGenerations[0];
       const gen: Generation = { ...base, id: `gen-${Date.now()}`, prompt, context: ctx, date: new Date().toISOString().slice(0,10) };
       setResult(gen);
+      setResultLabel(activeContextLabel);
       setPhase("result");
     }, 1500);
   };
@@ -100,13 +121,14 @@ function GeneratePage() {
         <h1 className="text-[28px] text-tighter text-text-primary mb-6">Generate</h1>
 
         {/* Context pills */}
-        <div className="flex gap-2 mb-5">
-          {CONTEXTS.map((c) => {
-            const active = c === ctx;
+        <label className="block text-[10px] small-caps text-text-muted mb-1.5">Context</label>
+        <div className="flex flex-wrap gap-2 mb-3">
+          {sourcePills.map((c) => {
+            const active = !customMode && c === selected;
             return (
               <button
                 key={c}
-                onClick={() => setCtx(c)}
+                onClick={() => { setCustomMode(false); setSelected(c); }}
                 className={`px-3.5 py-1.5 text-xs rounded-sm border transition-colors ${
                   active
                     ? "bg-indigo border-indigo text-white"
@@ -117,7 +139,28 @@ function GeneratePage() {
               </button>
             );
           })}
+          <button
+            onClick={() => setCustomMode(true)}
+            className={`px-3.5 py-1.5 text-xs rounded-sm border transition-colors ${
+              customMode
+                ? "bg-indigo border-indigo text-white"
+                : "border-dashed border-border text-text-secondary hover:text-text-primary hover:border-text-muted"
+            }`}
+          >
+            + Custom
+          </button>
         </div>
+
+        {customMode && (
+          <input
+            autoFocus
+            value={customText}
+            onChange={(e) => setCustomText(e.target.value)}
+            placeholder="describe the context (e.g. LinkedIn DM to a former colleague)"
+            className="w-full mb-5 bg-surface border border-indigo p-2.5 font-mono text-xs text-text-primary placeholder:text-text-muted focus:outline-none"
+          />
+        )}
+        {!customMode && <div className="mb-5" />}
 
         <label className="block text-[10px] small-caps text-text-muted mb-1.5">Writing Prompt</label>
         <textarea
@@ -155,7 +198,7 @@ function GeneratePage() {
               <div className="flex items-center justify-between px-5 py-3 border-b border-border">
                 <span className="text-[10px] small-caps text-text-muted">Generated Output</span>
                 <span className="text-[10px] small-caps px-2 py-0.5 border border-indigo text-indigo rounded-sm">
-                  {result.context}
+                  {resultLabel || result.context}
                 </span>
               </div>
               <pre className="font-mono text-sm text-text-primary p-5 whitespace-pre-wrap leading-relaxed">{result.output}</pre>

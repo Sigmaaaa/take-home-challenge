@@ -45,6 +45,7 @@ export interface Corpus {
   id: string;
   name: string;
   source_type: SourceType;
+  sources: string[];
   source_label: string;
   language: string;
   message_count: number;
@@ -124,6 +125,7 @@ export const mockCorpus: Corpus = {
   id: "reza-mixed",
   name: "Reza — Mixed Corpus",
   source_type: "Mixed",
+  sources: ["Email", "Slack", "WhatsApp"],
   source_label: "Gmail + Slack + WhatsApp export",
   language: "English",
   message_count: 276,
