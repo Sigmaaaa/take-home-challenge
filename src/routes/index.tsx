@@ -50,13 +50,7 @@ function Home() {
 
     const source_type = (sources[0] || "custom").toLowerCase();
     setLoading(true);
-    setStep(0);
-    setDone(false);
-
-    // Animate loader lines on a 1.5s cadence while requests are in-flight
-    const interval = setInterval(() => {
-      setStep((s) => Math.min(s + 1, EXTRACTION_LINES.length - 1));
-    }, 1500);
+    setApiDone(false);
 
     try {
       const ingest = await callFn<{ corpus_id: string }>("ingest-corpus", {
@@ -68,12 +62,9 @@ function Home() {
       });
       const corpusId = ingest.corpus_id;
       await callFn("extract-style", { corpus_id: corpusId });
-      clearInterval(interval);
-      setStep(EXTRACTION_LINES.length - 1);
-      setDone(true);
       setPendingId(corpusId);
+      setApiDone(true);
     } catch (e: any) {
-      clearInterval(interval);
       setLoading(false);
       setError(e?.message || "Something went wrong.");
     }
