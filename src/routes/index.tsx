@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Upload, FileText, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { TerminalLoader } from "@/components/TerminalLoader";
