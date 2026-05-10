@@ -246,11 +246,22 @@ function Section({ title, children, defaultOpen = false }: { title: string; chil
   );
 }
 
-function KV({ label, value, mono }: { label: string; value?: string | null; mono?: boolean }) {
+function LowMark() {
+  return (
+    <span
+      className="ml-1 text-warning cursor-help"
+      title="Limited evidence in corpus — may not be reliable."
+    >
+      ~
+    </span>
+  );
+}
+
+function KV({ label, value, mono, low }: { label: string; value?: string | null; mono?: boolean; low?: boolean }) {
   if (!value) return null;
   return (
     <div className="grid grid-cols-[180px_1fr] gap-4 py-2.5 border-b border-border last:border-b-0">
-      <div className="text-[10px] small-caps text-text-muted pt-0.5">{label}</div>
+      <div className="text-[10px] small-caps text-text-muted pt-0.5">{label}{low && <LowMark />}</div>
       <div className={`text-sm text-text-primary ${mono ? "font-mono" : ""}`}>{value}</div>
     </div>
   );
