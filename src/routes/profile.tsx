@@ -70,6 +70,11 @@ function ProfilePage() {
 
   const dateStr = c.created_at ? new Date(c.created_at).toISOString().slice(0, 10) : "";
 
+  const meta = data.profile?.extraction_metadata as any;
+  const confidence = meta?.data_confidence as "low" | "medium" | "high" | undefined;
+  const lowDims: string[] = Array.isArray(meta?.low_confidence_dimensions) ? meta.low_confidence_dimensions : [];
+  const isLow = (key: string) => lowDims.includes(key);
+
   return (
     <div className="pb-20 animate-[fadeIn_400ms_ease-out_both]">
       <style>{`@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }`}</style>
