@@ -105,6 +105,7 @@ function RootComponent() {
           </div>
         </main>
       </div>
+      <GlobalExtractionLoader />
     </QueryClientProvider>
   );
 }
