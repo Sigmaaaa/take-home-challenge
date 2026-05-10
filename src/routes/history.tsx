@@ -110,9 +110,12 @@ function Row({ g, open, onToggle }: { g: GenRow; open: boolean; onToggle: () => 
 
   return (
     <>
-      <button
+      <div
         onClick={onToggle}
-        className="w-full grid grid-cols-[1fr_120px_90px_100px_24px] gap-4 px-5 py-3 border-b border-border text-left hover:bg-surface-elevated transition-colors items-center"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggle(); } }}
+        className="group w-full grid grid-cols-[1fr_120px_90px_100px_24px_24px] gap-4 px-5 py-3 border-b border-border text-left hover:bg-surface-elevated transition-colors items-center cursor-pointer"
       >
         <div className="text-sm text-text-primary truncate">
           {g.prompt.slice(0, 60)}{g.prompt.length > 60 ? "…" : ""}
@@ -124,10 +127,13 @@ function Row({ g, open, onToggle }: { g: GenRow; open: boolean; onToggle: () => 
           </span>
         </div>
         <div className="font-mono text-xs text-text-muted">{date}</div>
+        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+          <DeleteGenerationButton generationId={g.id} />
+        </div>
         <div className="text-text-muted">
           {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         </div>
-      </button>
+      </div>
       {open && (
         <div className="px-5 py-5 border-b border-border bg-background">
           <div className="border border-border bg-surface mb-4">
