@@ -172,7 +172,7 @@ function GeneratePage() {
 
         <button
           onClick={onGenerate}
-          className="mt-3 w-full bg-indigo hover:bg-indigo/90 text-white text-sm py-3 rounded-sm"
+          className="mt-3 w-full bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] text-white text-sm py-3 rounded-sm"
         >
           Generate
         </button>
@@ -212,7 +212,7 @@ function GeneratePage() {
                 {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
                 {copied ? "Copied" : "Copy"}
               </button>
-              <button onClick={onSave} className="ml-auto px-4 py-2 text-xs bg-indigo text-white rounded-sm hover:opacity-90">
+              <button onClick={onSave} className="ml-auto px-4 py-2 text-xs bg-indigo hover:bg-indigo-hover text-white rounded-sm transition-colors">
                 Save
               </button>
             </div>

@@ -43,7 +43,7 @@ function ProfilePage() {
         </div>
         <Link
           to="/generate"
-          className="shrink-0 bg-indigo hover:bg-indigo/90 text-white text-sm py-2 px-4 rounded-sm"
+          className="shrink-0 bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] text-white text-sm py-2 px-4 rounded-sm"
         >
           Generate Text →
         </Link>
