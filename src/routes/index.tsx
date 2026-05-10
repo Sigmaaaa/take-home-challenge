@@ -210,3 +210,82 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </div>
   );
 }
+
+function FileDropZone({
+  filename,
+  charCount,
+  onFile,
+  onClear,
+}: {
+  filename: string | null;
+  charCount: number;
+  onFile: (f: File) => void;
+  onClear: () => void;
+}) {
+  const [dragOver, setDragOver] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) onFile(f);
+  };
+
+  return (
+    <div
+      onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={handleDrop}
+      className={`relative flex flex-col items-center justify-center min-h-[220px] bg-background border border-dashed transition-colors ${
+        dragOver ? "border-indigo bg-indigo/5" : "border-border hover:border-indigo"
+      }`}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".txt"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) onFile(f);
+          e.target.value = "";
+        }}
+      />
+      {filename ? (
+        <div className="text-center">
+          <FileText className="size-8 mx-auto text-indigo mb-3" />
+          <div className="font-mono text-sm text-text-primary">{filename}</div>
+          <div className="text-xs text-text-muted mt-1">{charCount} chars loaded</div>
+          <div className="mt-4 flex items-center justify-center gap-2">
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className="text-xs px-3 py-1.5 border border-border text-text-secondary hover:text-text-primary hover:border-indigo rounded-sm transition-colors"
+            >
+              Replace
+            </button>
+            <button
+              type="button"
+              onClick={onClear}
+              className="inline-flex items-center gap-1 text-xs px-3 py-1.5 border border-border text-text-secondary hover:text-danger hover:border-danger/50 rounded-sm transition-colors"
+            >
+              <X className="size-3" /> Remove
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="absolute inset-0 flex flex-col items-center justify-center cursor-pointer"
+        >
+          <Upload className="size-8 text-text-muted mb-3" />
+          <div className="text-sm text-text-secondary">
+            Drop a <span className="font-mono text-text-primary">.txt</span> file or click to browse
+          </div>
+        </button>
+      )}
+    </div>
+  );
+}
