@@ -235,7 +235,6 @@ function GeneratePage() {
             <ScoreCard score={result.score} />
           </>
         )}
-      </div>
     </div>
   );
 }
