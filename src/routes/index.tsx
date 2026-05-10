@@ -90,6 +90,7 @@ function Home() {
           lines={EXTRACTION_LINES}
           charCount={text.length}
           apiDone={apiDone}
+          corpusName={name}
           onDone={onLoaderDone}
         />
       )}
