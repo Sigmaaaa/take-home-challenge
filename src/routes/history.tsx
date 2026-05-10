@@ -157,7 +157,16 @@ function Row({ g, open, onToggle }: { g: GenRow; open: boolean; onToggle: () => 
         <div className="text-sm text-text-primary truncate">
           {g.prompt.slice(0, 80)}{g.prompt.length > 80 ? "…" : ""}
         </div>
-        <div className="text-xs text-text-secondary">{g.context_type || "—"}</div>
+        <div className="min-w-0">
+          {g.style_profile?.corpus?.name ? (
+            <span className="inline-block max-w-full truncate font-mono text-[11px] px-2 py-0.5 border border-border rounded-sm text-text-secondary bg-background">
+              {g.style_profile.corpus.name}
+            </span>
+          ) : (
+            <span className="text-xs text-text-muted">—</span>
+          )}
+        </div>
+        <div className="text-xs text-text-secondary truncate">{g.context_type || "—"}</div>
         <div>
           <span className={`font-mono text-xs px-2 py-0.5 rounded-sm border ${c}`}>
             {overall.toFixed(3)}
