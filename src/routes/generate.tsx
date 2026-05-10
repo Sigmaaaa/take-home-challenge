@@ -14,7 +14,21 @@ export const Route = createFileRoute("/generate")({
   }),
 });
 
-const CONTEXTS: ContextType[] = ["Formal Email", "Slack", "Text"];
+const CONTEXT_HINTS: Record<string, ContextType> = {
+  Email: "Formal Email",
+  Gmail: "Formal Email",
+  Slack: "Slack",
+  WhatsApp: "Text",
+  SMS: "Text",
+  Text: "Text",
+};
+
+function inferContextType(label: string): ContextType {
+  for (const [k, v] of Object.entries(CONTEXT_HINTS)) {
+    if (label.toLowerCase().includes(k.toLowerCase())) return v;
+  }
+  return "Text";
+}
 
 const LOADER_LINES = [
   "Internalizing style profile...",
