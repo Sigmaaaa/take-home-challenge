@@ -87,10 +87,10 @@ function Home() {
     <>
       {loading && (
         <TerminalLoader
-          lines={EXTRACTION_LINES.slice(0, step + 1)}
+          lines={EXTRACTION_LINES}
           intervalMs={1500}
-          onDone={done ? onLoaderDone : undefined}
-          finalDelayMs={500}
+          apiDone={apiDone}
+          onDone={onLoaderDone}
         />
       )}
 
