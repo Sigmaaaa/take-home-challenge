@@ -53,8 +53,8 @@ export function TerminalLoader({ lines, charCount, apiDone, onDone }: Props) {
   useEffect(() => {
     if (!(animationDone && apiDone)) return;
     setShowCompletion(true);
-    const t1 = setTimeout(() => setFadeOut(true), 600);
-    const t2 = setTimeout(() => onDone?.(), 600 + 500);
+    const t1 = setTimeout(() => setFadeOut(true), 2500);
+    const t2 = setTimeout(() => onDone?.(), 2500 + 500);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [animationDone, apiDone, onDone]);
 
