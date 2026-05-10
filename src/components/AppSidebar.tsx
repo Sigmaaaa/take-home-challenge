@@ -22,7 +22,7 @@ export function AppSidebar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
 
-  const { data: corpora = [] } = useQuery<CorpusRow[]>({
+  const { data: corpora = [], isLoading: corporaLoading } = useQuery<CorpusRow[]>({
     queryKey: ["corpora"],
     queryFn: async () => {
       const { data, error } = await supabase
