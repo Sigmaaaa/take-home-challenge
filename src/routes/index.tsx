@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { Upload, FileText } from "lucide-react";
+import { Upload, FileText, X } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { TerminalLoader } from "@/components/TerminalLoader";
 import { PillMultiSelect } from "@/components/PillMultiSelect";
