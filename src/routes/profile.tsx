@@ -186,7 +186,7 @@ function ProfilePage() {
         </div>
 
         <div className="py-3 border-b border-border">
-          <div className="text-[10px] small-caps text-text-muted mb-3">Pronoun Ratio</div>
+          <div className="text-[10px] small-caps text-text-muted mb-3">Pronoun Ratio{isLow("pronoun_ratio") && <LowMark />}</div>
           <div className="grid grid-cols-3 gap-3">
             {([["I", pronI], ["you", pronYou], ["we", pronWe]] as const).map(([k, v]) => (
               <div key={k}>
