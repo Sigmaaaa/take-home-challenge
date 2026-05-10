@@ -119,13 +119,14 @@ function GeneratePage() {
         <h1 className="text-[28px] text-tighter text-text-primary mb-6">Generate</h1>
 
         {/* Context pills */}
-        <div className="flex gap-2 mb-5">
-          {CONTEXTS.map((c) => {
-            const active = c === ctx;
+        <label className="block text-[10px] small-caps text-text-muted mb-1.5">Context</label>
+        <div className="flex flex-wrap gap-2 mb-3">
+          {sourcePills.map((c) => {
+            const active = !customMode && c === selected;
             return (
               <button
                 key={c}
-                onClick={() => setCtx(c)}
+                onClick={() => { setCustomMode(false); setSelected(c); }}
                 className={`px-3.5 py-1.5 text-xs rounded-sm border transition-colors ${
                   active
                     ? "bg-indigo border-indigo text-white"
@@ -136,7 +137,28 @@ function GeneratePage() {
               </button>
             );
           })}
+          <button
+            onClick={() => setCustomMode(true)}
+            className={`px-3.5 py-1.5 text-xs rounded-sm border transition-colors ${
+              customMode
+                ? "bg-indigo border-indigo text-white"
+                : "border-dashed border-border text-text-secondary hover:text-text-primary hover:border-text-muted"
+            }`}
+          >
+            + Custom
+          </button>
         </div>
+
+        {customMode && (
+          <input
+            autoFocus
+            value={customText}
+            onChange={(e) => setCustomText(e.target.value)}
+            placeholder="describe the context (e.g. LinkedIn DM to a former colleague)"
+            className="w-full mb-5 bg-surface border border-indigo p-2.5 font-mono text-xs text-text-primary placeholder:text-text-muted focus:outline-none"
+          />
+        )}
+        {!customMode && <div className="mb-5" />}
 
         <label className="block text-[10px] small-caps text-text-muted mb-1.5">Writing Prompt</label>
         <textarea
