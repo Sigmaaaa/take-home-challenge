@@ -1,16 +1,36 @@
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import { Home, History, Database, User, Wand2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useStore, storeActions } from "@/lib/store";
+import { supabase } from "@/lib/supabase";
 
 const nav = [
   { to: "/", label: "Home", icon: Home },
   { to: "/history", label: "History", icon: History },
 ] as const;
 
+interface CorpusRow {
+  id: string;
+  name: string;
+  source_type: string | null;
+}
+
 export function AppSidebar() {
-  const { corpora, activeCorpusId } = useStore();
+  const { activeCorpusId } = useStore();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+
+  const { data: corpora = [] } = useQuery<CorpusRow[]>({
+    queryKey: ["corpora"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("corpora")
+        .select("id, name, source_type")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as CorpusRow[];
+    },
+  });
 
   return (
     <aside className="w-[240px] shrink-0 border-r border-border bg-background flex flex-col h-screen sticky top-0">
@@ -64,11 +84,13 @@ export function AppSidebar() {
                   <Database className="size-3 shrink-0 opacity-60" />
                   <span className="truncate flex-1">{c.name}</span>
                 </div>
-                <div className="mt-1 ml-5">
-                  <span className="inline-block text-[9px] small-caps px-1.5 py-0.5 border border-border rounded-sm text-text-muted">
-                    {c.source_type}
-                  </span>
-                </div>
+                {c.source_type && (
+                  <div className="mt-1 ml-5">
+                    <span className="inline-block text-[9px] small-caps px-1.5 py-0.5 border border-border rounded-sm text-text-muted">
+                      {c.source_type}
+                    </span>
+                  </div>
+                )}
               </button>
               {active && (
                 <div className="px-3 pb-2 ml-5 flex flex-col gap-0.5">
