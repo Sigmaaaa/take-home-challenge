@@ -9,13 +9,13 @@ interface Props {
 
 function elapsedMessage(secs: number): string {
   const s = Math.max(2, secs);
-  if (secs <= 5) return `${s}s — warming up the neurons...`;
-  if (secs <= 10) return `${s}s — reading between the lines...`;
-  if (secs <= 15) return `${s}s — your writing has layers...`;
-  if (secs <= 20) return `${s}s — this one's complex (good sign)...`;
-  if (secs <= 25) return `${s}s — detecting your personality...`;
-  if (secs <= 30) return `${s}s — almost crystallized...`;
-  if (secs <= 35) return `${s}s — worth the wait, promise...`;
+  if (secs <= 10) return `${s}s — warming up the neurons...`;
+  if (secs <= 20) return `${s}s — reading between the lines...`;
+  if (secs <= 30) return `${s}s — your writing has layers...`;
+  if (secs <= 40) return `${s}s — this one's complex (good sign)...`;
+  if (secs <= 50) return `${s}s — detecting your personality...`;
+  if (secs <= 60) return `${s}s — almost crystallized...`;
+  if (secs <= 70) return `${s}s — worth the wait, promise...`;
   return `${s}s — any second now...`;
 }
 
