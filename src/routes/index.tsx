@@ -108,7 +108,7 @@ function Home() {
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Paste emails, Slack messages, texts — separated by ---"
+              placeholder="Paste emails, Slack messages, texts, DMs, journal entries — anything you've written. Separate distinct messages with --- on its own line."
               className="w-full min-h-[220px] bg-background border border-border p-4 font-mono text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-indigo resize-y"
             />
           ) : (
