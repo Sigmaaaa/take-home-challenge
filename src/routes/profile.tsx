@@ -226,6 +226,18 @@ function ProfilePage() {
           ))}
         </div>
       </div>
+
+      {meta && (
+        <div className="mt-4 border border-border bg-surface p-5">
+          <div className="text-[10px] small-caps text-text-muted mb-2">Extraction Notes</div>
+          {meta.extraction_notes && (
+            <p className="text-xs text-text-secondary leading-relaxed mb-2">{meta.extraction_notes}</p>
+          )}
+          {lowDims.length > 0 && (
+            <div className="text-[11px] font-mono text-warning">~{lowDims.length} dimensions flagged as low confidence</div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
