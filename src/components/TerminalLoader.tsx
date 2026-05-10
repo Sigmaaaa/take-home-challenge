@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 interface Props {
   lines: string[];
@@ -7,23 +7,30 @@ interface Props {
   onDone?: () => void;
 }
 
-const WAITING_MESSAGES = [
-  "Cross-referencing patterns...",
-  "Validating style hierarchy...",
-  "Finalizing fingerprint...",
-];
+function elapsedMessage(secs: number): string {
+  const s = Math.max(2, secs);
+  if (secs <= 5) return `${s}s — warming up the neurons...`;
+  if (secs <= 10) return `${s}s — reading between the lines...`;
+  if (secs <= 15) return `${s}s — your writing has layers...`;
+  if (secs <= 20) return `${s}s — this one's complex (good sign)...`;
+  if (secs <= 25) return `${s}s — detecting your personality...`;
+  if (secs <= 30) return `${s}s — almost crystallized...`;
+  if (secs <= 35) return `${s}s — worth the wait, promise...`;
+  return `${s}s — any second now...`;
+}
 
 export function TerminalLoader({ lines, charCount, apiDone, onDone }: Props) {
   const lineInterval = useMemo(() => {
-    const estimatedSeconds = Math.max(18, Math.floor(charCount / 2500));
-    return Math.floor((estimatedSeconds * 0.8 * 1000) / lines.length);
-  }, [charCount, lines.length]);
+    const estimatedSeconds = Math.max(28, Math.floor(charCount / 1500));
+    return Math.floor((estimatedSeconds * 0.75 * 1000) / 9);
+  }, [charCount]);
 
   const [shown, setShown] = useState(0);
   const [animationDone, setAnimationDone] = useState(false);
-  const [waitIdx, setWaitIdx] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
   const [showCompletion, setShowCompletion] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const startRef = useRef<number>(Date.now());
 
   useEffect(() => {
     if (shown >= lines.length - 1) {
@@ -34,12 +41,12 @@ export function TerminalLoader({ lines, charCount, apiDone, onDone }: Props) {
     return () => clearTimeout(t);
   }, [shown, lines.length, lineInterval]);
 
-  // Cycle waiting messages while animation done but API not done
+  // Tick elapsed seconds while waiting for API
   useEffect(() => {
     if (!animationDone || apiDone) return;
-    const t = setInterval(() => {
-      setWaitIdx((i) => (i + 1) % WAITING_MESSAGES.length);
-    }, 2000);
+    const tick = () => setElapsed(Math.floor((Date.now() - startRef.current) / 1000));
+    tick();
+    const t = setInterval(tick, 1000);
     return () => clearInterval(t);
   }, [animationDone, apiDone]);
 
@@ -51,7 +58,7 @@ export function TerminalLoader({ lines, charCount, apiDone, onDone }: Props) {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [animationDone, apiDone, onDone]);
 
-  const waitingForApi = animationDone && !apiDone;
+  const waitingForApi = animationDone && !apiDone && !showCompletion;
 
   return (
     <div
@@ -75,8 +82,8 @@ export function TerminalLoader({ lines, charCount, apiDone, onDone }: Props) {
           );
         })}
         {waitingForApi && (
-          <div key={waitIdx} className="text-indigo blink-cursor mt-1">
-            <span className="mr-2">›</span>{WAITING_MESSAGES[waitIdx]}
+          <div className="text-text-muted mt-1">
+            <span className="text-indigo mr-2">›</span>{elapsedMessage(elapsed)}
           </div>
         )}
         {showCompletion && (
