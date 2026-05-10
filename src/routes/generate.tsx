@@ -49,6 +49,7 @@ function GeneratePage() {
   const [phase, setPhase] = useState<"idle" | "loading" | "result">("idle");
   const [step, setStep] = useState(0);
   const [result, setResult] = useState<Generation | null>(null);
+  const [resultLabel, setResultLabel] = useState<string>("");
   const [copied, setCopied] = useState(false);
 
   if (!corpus) {
