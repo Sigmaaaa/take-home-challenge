@@ -141,28 +141,12 @@ function Home() {
               className="w-full min-h-[220px] bg-background border border-border p-4 font-mono text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-indigo resize-y"
             />
           ) : (
-            <label className="flex flex-col items-center justify-center min-h-[220px] bg-background border border-dashed border-border hover:border-indigo cursor-pointer transition-colors">
-              <input
-                type="file"
-                accept=".txt"
-                className="hidden"
-                onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
-              />
-              {filename ? (
-                <div className="text-center">
-                  <FileText className="size-8 mx-auto text-indigo mb-3" />
-                  <div className="font-mono text-sm text-text-primary">{filename}</div>
-                  <div className="text-xs text-text-muted mt-1">{text.length} chars loaded</div>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <Upload className="size-8 mx-auto text-text-muted mb-3" />
-                  <div className="text-sm text-text-secondary">
-                    Drop a <span className="font-mono text-text-primary">.txt</span> file or click to browse
-                  </div>
-                </div>
-              )}
-            </label>
+            <FileDropZone
+              filename={filename}
+              charCount={text.length}
+              onFile={onFile}
+              onClear={() => { setFilename(null); setText(""); }}
+            />
           )}
 
           <div className="grid grid-cols-2 gap-3 mt-5">
