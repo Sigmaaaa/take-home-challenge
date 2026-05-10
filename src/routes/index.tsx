@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Upload, FileText } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { TerminalLoader } from "@/components/TerminalLoader";
 import { PillMultiSelect } from "@/components/PillMultiSelect";
 import { storeActions } from "@/lib/store";
-import { mockCorpus } from "@/lib/mock-data";
+import { callFn } from "@/lib/supabase";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -17,46 +18,72 @@ export const Route = createFileRoute("/")({
 });
 
 const EXTRACTION_LINES = [
-  "Parsing corpus across registers (WhatsApp · Slack · Email)...",
+  "Parsing corpus across registers...",
   "Extracting coarse signal — social orientation and register...",
   "Mapping discourse structure and information flow...",
-  "Detecting prosodic compensation patterns (elongation, stacking)...",
+  "Detecting prosodic compensation patterns...",
   "Computing pronoun ratio and politeness strategy...",
-  "Analyzing hedging language and intensifier distribution...",
-  "Calibrating register-shift triggers...",
+  "Analyzing hedging and intensifier distribution...",
   "Building cognitive style hierarchy (coarse → mid → fine)...",
   "Crystallizing your linguistic fingerprint...",
 ];
 
 function Home() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [tab, setTab] = useState<"paste" | "upload">("paste");
   const [text, setText] = useState("");
   const [filename, setFilename] = useState<string | null>(null);
-  const [name, setName] = useState("Reza — Mixed Corpus");
-  const [sources, setSources] = useState<string[]>(["Email", "Slack", "WhatsApp"]);
-  const [label, setLabel] = useState("Gmail sent folder");
+  const [name, setName] = useState("");
+  const [sources, setSources] = useState<string[]>(["Email"]);
+  const [label, setLabel] = useState("");
   const [langs, setLangs] = useState<string[]>(["English"]);
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(false);
+  const [pendingId, setPendingId] = useState<string | null>(null);
 
-  const onAnalyze = () => {
+  const onAnalyze = async () => {
+    setError(null);
+    if (!text.trim()) { setError("Paste some writing first."); return; }
+    if (!name.trim()) { setError("Give the corpus a name."); return; }
+
+    const source_type = (sources[0] || "custom").toLowerCase();
     setLoading(true);
+    setStep(0);
+    setDone(false);
+
+    // Animate loader lines on a 1.5s cadence while requests are in-flight
+    const interval = setInterval(() => {
+      setStep((s) => Math.min(s + 1, EXTRACTION_LINES.length - 1));
+    }, 1500);
+
+    try {
+      const ingest = await callFn<{ corpus_id: string }>("ingest-corpus", {
+        name,
+        raw_text: text,
+        source_type,
+        source_label: label,
+        language: langs.join(" + ") || "English",
+      });
+      const corpusId = ingest.corpus_id;
+      await callFn("extract-style", { corpus_id: corpusId });
+      clearInterval(interval);
+      setStep(EXTRACTION_LINES.length - 1);
+      setDone(true);
+      setPendingId(corpusId);
+    } catch (e: any) {
+      clearInterval(interval);
+      setLoading(false);
+      setError(e?.message || "Something went wrong.");
+    }
   };
 
   const onLoaderDone = () => {
-    const derivedType =
-      sources.length === 0 ? "Mixed" :
-      sources.length > 1 ? "Mixed" :
-      (["Email", "Slack", "WhatsApp"].includes(sources[0]) ? sources[0] : "Mixed");
-    storeActions.addCorpus({
-      ...mockCorpus,
-      id: `corpus-${Date.now()}`,
-      name: name || mockCorpus.name,
-      source_type: derivedType as any,
-      sources,
-      source_label: label,
-      language: langs.join(" + ") || "English",
-    });
+    if (!pendingId) return;
+    storeActions.setActiveCorpus(pendingId);
+    qc.invalidateQueries({ queryKey: ["corpora"] });
     setLoading(false);
     navigate({ to: "/profile" });
   };
@@ -69,7 +96,12 @@ function Home() {
   return (
     <>
       {loading && (
-        <TerminalLoader lines={EXTRACTION_LINES} intervalMs={1300} onDone={onLoaderDone} />
+        <TerminalLoader
+          lines={EXTRACTION_LINES.slice(0, step + 1)}
+          intervalMs={1500}
+          onDone={done ? onLoaderDone : undefined}
+          finalDelayMs={500}
+        />
       )}
 
       <header className="mb-8">
@@ -82,7 +114,6 @@ function Home() {
       </header>
 
       <div className="border border-border bg-surface">
-        {/* Tabs */}
         <div className="flex border-b border-border">
           {(["paste", "upload"] as const).map((t) => {
             const active = tab === t;
@@ -95,9 +126,7 @@ function Home() {
                 }`}
               >
                 {t === "paste" ? "Paste Text" : "Upload File"}
-                {active && (
-                  <span className="absolute left-0 right-0 -bottom-px h-px bg-indigo" />
-                )}
+                {active && <span className="absolute left-0 right-0 -bottom-px h-px bg-indigo" />}
               </button>
             );
           })}
@@ -108,7 +137,7 @@ function Home() {
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Paste emails, Slack messages, texts, DMs, journal entries — anything you've written. Separate distinct messages with --- on its own line."
+              placeholder="Paste emails, Slack messages, texts, DMs, journal entries — anything you've written."
               className="w-full min-h-[220px] bg-background border border-border p-4 font-mono text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-indigo resize-y"
             />
           ) : (
@@ -138,19 +167,10 @@ function Home() {
 
           <div className="grid grid-cols-2 gap-3 mt-5">
             <Field label="Corpus Name">
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="input"
-              />
+              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. My Mixed Corpus" className="input" />
             </Field>
             <Field label="Source Label">
-              <input
-                value={label}
-                onChange={(e) => setLabel(e.target.value)}
-                placeholder="e.g. Gmail sent folder"
-                className="input"
-              />
+              <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Gmail sent folder" className="input" />
             </Field>
           </div>
 
@@ -174,9 +194,16 @@ function Home() {
             />
           </div>
 
+          {error && (
+            <div className="mt-4 border border-danger/50 bg-danger/10 text-danger text-xs px-3 py-2 rounded-sm font-mono">
+              {error}
+            </div>
+          )}
+
           <button
             onClick={onAnalyze}
-            className="mt-5 w-full bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] text-white text-sm font-medium py-3 rounded-sm transition-colors"
+            disabled={loading}
+            className="mt-5 w-full bg-indigo hover:bg-indigo-hover hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_25%,transparent)] disabled:opacity-50 text-white text-sm font-medium py-3 rounded-sm transition-colors"
           >
             Analyze Style →
           </button>
@@ -184,16 +211,7 @@ function Home() {
       </div>
 
       <style>{`
-        .input {
-          width: 100%;
-          background: var(--background);
-          border: 1px solid var(--border);
-          color: var(--text-primary);
-          padding: 8px 10px;
-          font-size: 13px;
-          border-radius: 3px;
-          outline: none;
-        }
+        .input { width:100%; background:var(--background); border:1px solid var(--border); color:var(--text-primary); padding:8px 10px; font-size:13px; border-radius:3px; outline:none; }
         .input:focus { border-color: var(--indigo); }
       `}</style>
     </>
