@@ -93,6 +93,7 @@ function HistoryPage() {
         <div className="grid grid-cols-[24px_1fr_140px_110px_80px_90px_24px] gap-4 px-5 py-3 border-b border-border text-[10px] small-caps text-text-muted">
           <div />
           <div>Prompt</div>
+          <div>Corpus</div>
           <div>Context</div>
           <div>Score</div>
           <div>Date</div>
