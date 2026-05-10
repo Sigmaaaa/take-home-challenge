@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Upload, FileText } from "lucide-react";
 import { TerminalLoader } from "@/components/TerminalLoader";
+import { PillMultiSelect } from "@/components/PillMultiSelect";
 import { storeActions } from "@/lib/store";
 import { mockCorpus } from "@/lib/mock-data";
 
@@ -33,9 +34,9 @@ function Home() {
   const [text, setText] = useState("");
   const [filename, setFilename] = useState<string | null>(null);
   const [name, setName] = useState("Reza — Mixed Corpus");
-  const [source, setSource] = useState("Mixed");
+  const [sources, setSources] = useState<string[]>(["Email", "Slack", "WhatsApp"]);
   const [label, setLabel] = useState("Gmail sent folder");
-  const [lang, setLang] = useState("English");
+  const [langs, setLangs] = useState<string[]>(["English"]);
   const [loading, setLoading] = useState(false);
 
   const onAnalyze = () => {
@@ -43,13 +44,18 @@ function Home() {
   };
 
   const onLoaderDone = () => {
+    const derivedType =
+      sources.length === 0 ? "Mixed" :
+      sources.length > 1 ? "Mixed" :
+      (["Email", "Slack", "WhatsApp"].includes(sources[0]) ? sources[0] : "Mixed");
     storeActions.addCorpus({
       ...mockCorpus,
       id: `corpus-${Date.now()}`,
       name: name || mockCorpus.name,
-      source_type: source as any,
+      source_type: derivedType as any,
+      sources,
       source_label: label,
-      language: lang,
+      language: langs.join(" + ") || "English",
     });
     setLoading(false);
     navigate({ to: "/profile" });
@@ -138,11 +144,6 @@ function Home() {
                 className="input"
               />
             </Field>
-            <Field label="Source Type">
-              <select value={source} onChange={(e) => setSource(e.target.value)} className="input">
-                <option>Mixed</option><option>Email</option><option>Slack</option><option>WhatsApp</option>
-              </select>
-            </Field>
             <Field label="Source Label">
               <input
                 value={label}
@@ -151,11 +152,26 @@ function Home() {
                 className="input"
               />
             </Field>
-            <Field label="Language">
-              <select value={lang} onChange={(e) => setLang(e.target.value)} className="input">
-                <option>English</option><option>Persian/Farsi</option><option>Other</option>
-              </select>
-            </Field>
+          </div>
+
+          <div className="mt-4">
+            <label className="block text-[10px] small-caps text-text-muted mb-1.5">Source Type</label>
+            <PillMultiSelect
+              options={["Email", "Slack", "WhatsApp"]}
+              value={sources}
+              onChange={setSources}
+              customPlaceholder="e.g. Discord, LinkedIn"
+            />
+          </div>
+
+          <div className="mt-4">
+            <label className="block text-[10px] small-caps text-text-muted mb-1.5">Language</label>
+            <PillMultiSelect
+              options={["English", "Persian/Farsi", "Spanish", "French"]}
+              value={langs}
+              onChange={setLangs}
+              customPlaceholder="e.g. German"
+            />
           </div>
 
           <button
