@@ -13,6 +13,7 @@ interface CorpusRow {
   id: string;
   name: string;
   source_type: string | null;
+  created_at: string | null;
 }
 
 export function AppSidebar() {
@@ -25,7 +26,7 @@ export function AppSidebar() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("corpora")
-        .select("id, name, source_type")
+        .select("id, name, source_type, created_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as CorpusRow[];
@@ -84,13 +85,18 @@ export function AppSidebar() {
                   <Database className="size-3 shrink-0 opacity-60" />
                   <span className="truncate flex-1">{c.name}</span>
                 </div>
-                {c.source_type && (
-                  <div className="mt-1 ml-5">
+                <div className="mt-1 ml-5 flex items-center gap-2">
+                  {c.source_type && (
                     <span className="inline-block text-[9px] small-caps px-1.5 py-0.5 border border-border rounded-sm text-text-muted">
                       {c.source_type}
                     </span>
-                  </div>
-                )}
+                  )}
+                  {c.created_at && (
+                    <span className="text-[10px] text-text-muted font-mono">
+                      {new Date(c.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    </span>
+                  )}
+                </div>
               </button>
               {active && (
                 <div className="px-3 pb-2 ml-5 flex flex-col gap-0.5">
