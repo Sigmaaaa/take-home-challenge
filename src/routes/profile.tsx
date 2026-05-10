@@ -99,6 +99,17 @@ function ProfilePage() {
         </div>
       </header>
 
+      {confidence === "low" && (
+        <div className="mb-6 border border-warning/50 bg-warning/10 text-warning text-xs px-4 py-3 rounded-sm font-mono">
+          ⚠ Low data confidence — profile based on limited writing samples. Patterns marked ~ may not be reliable. Add more writing for a stronger fingerprint.
+        </div>
+      )}
+      {confidence === "medium" && (
+        <div className="mb-6 border border-border bg-surface text-text-muted text-xs px-4 py-3 rounded-sm font-mono">
+          ○ Medium confidence — some dimensions may improve with more samples.
+        </div>
+      )}
+
       <Section title="Global" defaultOpen>
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
