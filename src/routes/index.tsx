@@ -144,11 +144,6 @@ function Home() {
                 className="input"
               />
             </Field>
-            <Field label="Source Type">
-              <select value={source} onChange={(e) => setSource(e.target.value)} className="input">
-                <option>Mixed</option><option>Email</option><option>Slack</option><option>WhatsApp</option>
-              </select>
-            </Field>
             <Field label="Source Label">
               <input
                 value={label}
@@ -157,11 +152,26 @@ function Home() {
                 className="input"
               />
             </Field>
-            <Field label="Language">
-              <select value={lang} onChange={(e) => setLang(e.target.value)} className="input">
-                <option>English</option><option>Persian/Farsi</option><option>Other</option>
-              </select>
-            </Field>
+          </div>
+
+          <div className="mt-4">
+            <label className="block text-[10px] small-caps text-text-muted mb-1.5">Source Type</label>
+            <PillMultiSelect
+              options={["Email", "Slack", "WhatsApp"]}
+              value={sources}
+              onChange={setSources}
+              customPlaceholder="e.g. Discord, LinkedIn"
+            />
+          </div>
+
+          <div className="mt-4">
+            <label className="block text-[10px] small-caps text-text-muted mb-1.5">Language</label>
+            <PillMultiSelect
+              options={["English", "Persian/Farsi", "Spanish", "French"]}
+              value={langs}
+              onChange={setLangs}
+              customPlaceholder="e.g. German"
+            />
           </div>
 
           <button
