@@ -118,19 +118,19 @@ function ProfilePage() {
           </div>
           <Bar value={formality} />
         </div>
-        <KV label="Register" value={p.register} />
-        <KV label="Avg Message Length" value={p.avg_message_length} mono />
-        <KV label="Overall Tone" value={p.overall_tone} />
-        <KV label="Social Orientation" value={p.social_orientation} />
-        <KV label="Politeness Strategy" value={p.politeness_strategy} />
+        <KV label="Register" value={p.register} low={isLow("register")} />
+        <KV label="Avg Message Length" value={p.avg_message_length} mono low={isLow("avg_message_length")} />
+        <KV label="Overall Tone" value={p.overall_tone} low={isLow("overall_tone")} />
+        <KV label="Social Orientation" value={p.social_orientation} low={isLow("social_orientation")} />
+        <KV label="Politeness Strategy" value={p.politeness_strategy} low={isLow("politeness_strategy")} />
       </Section>
 
       <Section title="Mid-Level">
-        <KV label="Sentence Rhythm" value={p.sentence_rhythm} />
-        <KV label="Question Frequency" value={p.question_frequency} mono />
-        <ChipsRow label="Structural Habits" items={arr(p.structural_habits)} tag />
-        <KV label="Information Structure" value={p.information_structure} />
-        <KV label="Follow-up Behavior" value={p.follow_up_behavior} />
+        <KV label="Sentence Rhythm" value={p.sentence_rhythm} low={isLow("sentence_rhythm")} />
+        <KV label="Question Frequency" value={p.question_frequency} mono low={isLow("question_frequency")} />
+        <ChipsRow label="Structural Habits" items={arr(p.structural_habits)} tag low={isLow("structural_habits")} />
+        <KV label="Information Structure" value={p.information_structure} low={isLow("information_structure")} />
+        <KV label="Follow-up Behavior" value={p.follow_up_behavior} low={isLow("follow_up_behavior")} />
 
         <div className="py-3 border-b border-border">
           <div className="text-[10px] small-caps text-text-muted mb-2">Openers</div>
