@@ -1,9 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { useStore } from "@/lib/store";
-import { supabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -16,65 +14,31 @@ export const Route = createFileRoute("/profile")({
 });
 
 function ProfilePage() {
-  const { activeCorpusId } = useStore();
+  const { corpora, activeCorpusId } = useStore();
+  const corpus = corpora.find((c) => c.id === activeCorpusId) ?? corpora[0];
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["style_profile", activeCorpusId],
-    enabled: !!activeCorpusId,
-    queryFn: async () => {
-      const [corpusRes, profileRes] = await Promise.all([
-        supabase.from("corpora").select("*").eq("id", activeCorpusId!).maybeSingle(),
-        supabase.from("style_profiles").select("*").eq("corpus_id", activeCorpusId!).maybeSingle(),
-      ]);
-      if (corpusRes.error) throw corpusRes.error;
-      if (profileRes.error) throw profileRes.error;
-      return { corpus: corpusRes.data as any, profile: profileRes.data as any };
-    },
-  });
-
-  if (!activeCorpusId) {
+  if (!corpus) {
     return (
       <div className="text-center py-20">
-        <p className="text-text-secondary text-sm mb-4">No corpus selected.</p>
+        <p className="text-text-secondary text-sm mb-4">No corpus loaded.</p>
         <Link to="/" className="text-indigo text-sm">Analyze one →</Link>
       </div>
     );
   }
-  if (isLoading) return <div className="text-text-secondary text-sm py-10">Loading profile…</div>;
-  if (error) return <div className="text-danger text-sm py-10">{(error as Error).message}</div>;
-  if (!data?.corpus) return <div className="text-text-secondary text-sm py-10">Corpus not found.</div>;
-  if (!data.profile) return (
-    <div className="text-text-secondary text-sm py-10">
-      No style profile yet for this corpus. <Link to="/" className="text-indigo">Analyze again →</Link>
-    </div>
-  );
 
-  const c = data.corpus;
-  const p = data.profile;
-
-  // Defensive accessors — schema is JSON-ish per spec
-  const get = (obj: any, ...keys: string[]) => keys.reduce((acc, k) => (acc == null ? acc : acc[k]), obj);
-  const arr = (v: any): string[] => Array.isArray(v) ? v.filter((x) => typeof x === "string" || typeof x === "number").map(String) : [];
-
-  const formality = Number(p.formality_score ?? 0);
-  const cog = p.cognitive_spike ?? {};
-  const pron = p.pronoun_ratio ?? {};
-  const pronI = Number(pron.I ?? pron.i ?? pron.first_person ?? 0);
-  const pronYou = Number(pron.you ?? pron.second_person ?? 0);
-  const pronWe = Number(pron.we ?? pron.first_person_plural ?? 0);
-
-  const dateStr = c.created_at ? new Date(c.created_at).toISOString().slice(0, 10) : "";
+  const p = corpus.profile;
 
   return (
     <div className="pb-20">
       <header className="flex items-start justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-[32px] text-tighter text-text-primary leading-[1.1]">{c.name}</h1>
+          <h1 className="text-[32px] text-tighter text-text-primary leading-[1.1]">{corpus.name}</h1>
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {c.source_type && <Pill>{c.source_type}</Pill>}
-            {c.language && <Pill>{c.language}</Pill>}
-            {c.source_label && <Pill>{c.source_label}</Pill>}
-            {dateStr && <Pill>analyzed {dateStr}</Pill>}
+            <Pill>{corpus.source_type}</Pill>
+            <Pill>{corpus.message_count} msgs</Pill>
+            <Pill>{corpus.char_count.toLocaleString()} chars</Pill>
+            <Pill>{corpus.language}</Pill>
+            <Pill>analyzed {corpus.date_analyzed}</Pill>
           </div>
         </div>
         <Link
@@ -89,87 +53,82 @@ function ProfilePage() {
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] small-caps text-text-muted">Formality Score</span>
-            <span className="font-mono text-sm text-text-primary">{formality.toFixed(2)}</span>
+            <span className="font-mono text-sm text-text-primary">{p.global.formality.toFixed(2)}</span>
           </div>
-          <Bar value={formality} />
+          <Bar value={p.global.formality} />
         </div>
-        <KV label="Register" value={p.register} />
-        <KV label="Avg Message Length" value={p.avg_message_length} mono />
-        <KV label="Overall Tone" value={p.overall_tone} />
-        <KV label="Social Orientation" value={p.social_orientation} />
-        <KV label="Politeness Strategy" value={p.politeness_strategy} />
+        <KV label="Register" value={p.global.register} />
+        <KV label="Avg Message Length" value={p.global.avg_message_length} mono />
+        <KV label="Overall Tone" value={p.global.overall_tone} />
+        <KV label="Social Orientation" value={p.global.social_orientation} />
+        <KV label="Politeness Strategy" value={p.global.politeness_strategy} />
       </Section>
 
       <Section title="Mid-Level">
-        <KV label="Sentence Rhythm" value={p.sentence_rhythm} />
-        <KV label="Question Frequency" value={p.question_frequency} mono />
-        <ChipsRow label="Structural Habits" items={arr(p.structural_habits)} tag />
-        <KV label="Information Structure" value={p.information_structure} />
-        <KV label="Follow-up Behavior" value={p.follow_up_behavior} />
+        <KV label="Sentence Rhythm" value={p.mid.sentence_rhythm} />
+        <KV label="Question Frequency" value={p.mid.question_frequency} mono />
+        <div className="py-2.5 border-b border-border">
+          <div className="text-[10px] small-caps text-text-muted mb-2">Structural Habits</div>
+          <div className="flex flex-wrap gap-1.5">
+            {p.mid.structural_habits.map((h) => <Tag key={h}>{h}</Tag>)}
+          </div>
+        </div>
+        <KV label="Information Structure" value={p.mid.information_structure} />
+        <KV label="Follow-up Behavior" value={p.mid.follow_up_behavior} />
+        <KV label="Social Maintenance" value={p.mid.social_maintenance} />
 
         <div className="py-3 border-b border-border">
           <div className="text-[10px] small-caps text-text-muted mb-2">Openers</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
-            {arr(get(p, "opener_patterns", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
+            {p.mid.opener_examples.map((e) => <Chip key={e}>{e}</Chip>)}
           </div>
-          {get(p, "opener_patterns", "pattern") && (
-            <p className="text-xs text-text-secondary italic">{get(p, "opener_patterns", "pattern")}</p>
-          )}
+          <p className="text-xs text-text-secondary italic">{p.mid.opener_pattern}</p>
         </div>
 
         <div className="py-3">
           <div className="text-[10px] small-caps text-text-muted mb-2">Closers</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
-            {arr(get(p, "closer_patterns", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
+            {p.mid.closer_examples.map((e) => <Chip key={e}>{e}</Chip>)}
           </div>
-          {get(p, "closer_patterns", "pattern") && (
-            <p className="text-xs text-text-secondary italic">{get(p, "closer_patterns", "pattern")}</p>
-          )}
+          <p className="text-xs text-text-secondary italic">{p.mid.closer_pattern}</p>
         </div>
       </Section>
 
       <Section title="Local">
         <div className="py-3 border-b border-border">
           <div className="text-[10px] small-caps text-text-muted mb-2">Emoji Usage</div>
-          {p.emoji_usage && <p className="text-sm text-text-primary mb-2">{p.emoji_usage}</p>}
-          <div className="flex flex-wrap gap-2 text-xl">
-            {arr(get(p, "emoji_style", "examples")).map((e, i) => (
-              <span key={i} className="px-2 py-1 border border-border rounded-sm bg-background text-base">{e}</span>
-            ))}
+          <p className="text-sm text-text-primary mb-2">{p.local.emoji_usage}</p>
+          <div className="flex gap-2 text-xl">
+            {p.local.emoji_examples.map((e, i) => <span key={i}>{e}</span>)}
           </div>
         </div>
 
         <div className="py-3 border-b border-border">
           <div className="text-[10px] small-caps text-text-muted mb-2">Prosodic Compensation</div>
-          <div className="flex flex-wrap gap-1.5">
-            {arr(get(p, "prosodic_compensation", "letter_repetition", "examples")).map((e) => (
-              <Chip key={e}>{e}</Chip>
-            ))}
-          </div>
-        </div>
-
-        <ChipsRow label="Filler Phrases" items={arr(get(p, "filler_phrases", "examples"))} />
-
-        <div className="py-3 border-b border-border">
-          <div className="text-[10px] small-caps text-text-muted mb-2">Hedging Language</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
-            {arr(get(p, "hedging_language", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
+            {p.local.letter_repetition.map((e) => <Chip key={e}>{e}</Chip>)}
           </div>
-          {get(p, "hedging_language", "pattern") && (
-            <p className="text-xs text-text-secondary italic">{get(p, "hedging_language", "pattern")}</p>
-          )}
+          <div className="flex flex-wrap gap-1.5">
+            {p.local.punctuation_stacking.map((e) => <Chip key={e}>{e}</Chip>)}
+          </div>
         </div>
+
+        <ChipsRow label="Filler Phrases" items={p.local.filler_phrases} />
+        <ChipsRow label="Hedging Language" items={p.local.hedging} />
+        <ChipsRow label="Intensifiers" items={p.local.intensifiers} />
 
         <div className="py-3 border-b border-border">
           <div className="text-[10px] small-caps text-text-muted mb-3">Pronoun Ratio</div>
           <div className="grid grid-cols-3 gap-3">
-            {([["I", pronI], ["you", pronYou], ["we", pronWe]] as const).map(([k, v]) => (
+            {(["I", "you", "we"] as const).map((k) => (
               <div key={k}>
                 <div className="flex justify-between mb-1">
                   <span className="font-mono text-xs text-text-secondary">{k}</span>
-                  <span className="font-mono text-xs text-text-primary">{(v * 100).toFixed(0)}%</span>
+                  <span className="font-mono text-xs text-text-primary">
+                    {(p.local.pronoun_ratio[k] * 100).toFixed(0)}%
+                  </span>
                 </div>
-                <Bar value={v} />
+                <Bar value={p.local.pronoun_ratio[k]} />
               </div>
             ))}
           </div>
@@ -178,25 +137,24 @@ function ProfilePage() {
         <div className="py-3">
           <div className="text-[10px] small-caps text-text-muted mb-2">Sign-offs</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
-            {arr(get(p, "sign_offs", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
+            {p.local.signoffs.map((e) => <Chip key={e}>{e}</Chip>)}
           </div>
-          {get(p, "sign_offs", "pattern") && (
-            <p className="text-xs text-text-secondary italic">{get(p, "sign_offs", "pattern")}</p>
-          )}
+          <p className="text-xs text-text-secondary italic">{p.local.signoff_pattern}</p>
         </div>
       </Section>
 
+      {/* Cognitive Signature */}
       <div className="mt-8 border border-border border-l-[3px] border-l-indigo bg-surface-elevated p-7">
         <div className="text-[11px] small-caps text-indigo mb-5">Cognitive Signature</div>
         <div className="space-y-5">
           {[
-            { k: "COARSE", v: cog.coarse_signal },
-            { k: "MID", v: cog.mid_signal },
-            { k: "FINE", v: cog.fine_signal },
+            { k: "COARSE", v: p.cognitive.coarse },
+            { k: "MID", v: p.cognitive.mid },
+            { k: "FINE", v: p.cognitive.fine },
           ].map((row) => (
             <div key={row.k}>
               <div className="font-mono text-[10px] text-text-muted mb-1.5 tracking-wider">{row.k}</div>
-              <p className="text-[15px] leading-relaxed text-text-primary">{row.v || "—"}</p>
+              <p className="text-[15px] leading-relaxed text-text-primary">{row.v}</p>
             </div>
           ))}
         </div>
@@ -221,8 +179,7 @@ function Section({ title, children, defaultOpen = false }: { title: string; chil
   );
 }
 
-function KV({ label, value, mono }: { label: string; value?: string | null; mono?: boolean }) {
-  if (!value) return null;
+function KV({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="grid grid-cols-[180px_1fr] gap-4 py-2.5 border-b border-border last:border-b-0">
       <div className="text-[10px] small-caps text-text-muted pt-0.5">{label}</div>
@@ -247,6 +204,14 @@ function Pill({ children }: { children: React.ReactNode }) {
   );
 }
 
+function Tag({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-block text-xs px-2 py-1 border border-border rounded-sm text-text-primary bg-surface-elevated">
+      {children}
+    </span>
+  );
+}
+
 function Chip({ children }: { children: React.ReactNode }) {
   return (
     <span className="inline-block font-mono text-xs px-2 py-1 border border-border rounded-sm text-text-primary bg-background">
@@ -255,17 +220,12 @@ function Chip({ children }: { children: React.ReactNode }) {
   );
 }
 
-function ChipsRow({ label, items, tag = false }: { label: string; items: string[]; tag?: boolean }) {
-  if (items.length === 0) return null;
+function ChipsRow({ label, items }: { label: string; items: string[] }) {
   return (
     <div className="py-3 border-b border-border">
       <div className="text-[10px] small-caps text-text-muted mb-2">{label}</div>
       <div className="flex flex-wrap gap-1.5">
-        {items.map((i) => tag ? (
-          <span key={i} className="inline-block text-xs px-2 py-1 border border-border rounded-sm text-text-primary bg-surface-elevated">{i}</span>
-        ) : (
-          <Chip key={i}>{i}</Chip>
-        ))}
+        {items.map((i) => <Chip key={i}>{i}</Chip>)}
       </div>
     </div>
   );
