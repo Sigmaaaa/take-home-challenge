@@ -118,7 +118,7 @@ function GeneratePage() {
 
       {/* Right pane */}
       <div className="min-w-0">
-        <h1 className="text-[28px] text-tighter text-text-primary mb-6">Generate</h1>
+        <h1 className="text-[44px] text-tighter text-text-primary mb-8 leading-none">Generate</h1>
 
         {/* Context pills */}
         <label className="block text-[10px] small-caps text-text-muted mb-1.5">Context</label>
