@@ -1,11 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { Upload, FileText, X } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
-import { TerminalLoader } from "@/components/TerminalLoader";
 import { PillMultiSelect } from "@/components/PillMultiSelect";
-import { storeActions } from "@/lib/store";
-import { callFn } from "@/lib/supabase";
+import { storeActions, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -17,20 +14,8 @@ export const Route = createFileRoute("/")({
   }),
 });
 
-const EXTRACTION_LINES = [
-  "Parsing corpus across registers...",
-  "Extracting coarse signal — social orientation and register...",
-  "Mapping discourse structure and information flow...",
-  "Detecting prosodic compensation patterns...",
-  "Computing pronoun ratio and politeness strategy...",
-  "Analyzing hedging and intensifier distribution...",
-  "Building cognitive style hierarchy (coarse → mid → fine)...",
-  "Crystallizing your linguistic fingerprint...",
-];
-
 function Home() {
-  const navigate = useNavigate();
-  const qc = useQueryClient();
+  const { extraction } = useStore();
   const [tab, setTab] = useState<"paste" | "upload">("paste");
   const [text, setText] = useState("");
   const [filename, setFilename] = useState<string | null>(null);
@@ -38,44 +23,28 @@ function Home() {
   const [sources, setSources] = useState<string[]>(["Email"]);
   const [label, setLabel] = useState("");
   const [langs, setLangs] = useState<string[]>(["English"]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [apiDone, setApiDone] = useState(false);
-  const [pendingId, setPendingId] = useState<string | null>(null);
 
-  const onAnalyze = async () => {
+  const loading = extraction.active;
+
+  // Surface async extraction errors from the global store
+  useEffect(() => {
+    if (extraction.error) setError(extraction.error);
+  }, [extraction.error]);
+
+  const onAnalyze = () => {
     setError(null);
     if (!text.trim()) { setError("Paste some writing first."); return; }
     if (!name.trim()) { setError("Give the corpus a name."); return; }
 
     const source_type = (sources[0] || "custom").toLowerCase();
-    setLoading(true);
-    setApiDone(false);
-
-    try {
-      const ingest = await callFn<{ corpus_id: string }>("ingest-corpus", {
-        name,
-        raw_text: text,
-        source_type,
-        source_label: label,
-        language: langs.join(" + ") || "English",
-      });
-      const corpusId = ingest.corpus_id;
-      await callFn("extract-style", { corpus_id: corpusId });
-      setPendingId(corpusId);
-      setApiDone(true);
-    } catch (e: any) {
-      setLoading(false);
-      setError(e?.message || "Something went wrong.");
-    }
-  };
-
-  const onLoaderDone = () => {
-    if (!pendingId) return;
-    storeActions.setActiveCorpus(pendingId);
-    qc.invalidateQueries({ queryKey: ["corpora"] });
-    setLoading(false);
-    navigate({ to: "/profile" });
+    storeActions.startExtraction({
+      name,
+      text,
+      source_type,
+      source_label: label,
+      language: langs.join(" + ") || "English",
+    });
   };
 
   const onFile = (f: File) => {
@@ -85,16 +54,6 @@ function Home() {
 
   return (
     <>
-      {loading && (
-        <TerminalLoader
-          lines={EXTRACTION_LINES}
-          charCount={text.length}
-          apiDone={apiDone}
-          corpusName={name}
-          onDone={onLoaderDone}
-        />
-      )}
-
       <header className="mb-8">
         <h1 className="text-[34px] text-tighter text-text-primary leading-[1.1]">
           Analyze a Writing Corpus
