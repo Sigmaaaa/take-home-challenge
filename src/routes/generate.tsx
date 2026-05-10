@@ -39,7 +39,12 @@ const LOADER_LINES = [
 function GeneratePage() {
   const { corpora, activeCorpusId } = useStore();
   const corpus = corpora.find((c) => c.id === activeCorpusId) ?? corpora[0];
-  const [ctx, setCtx] = useState<ContextType>("Formal Email");
+  const sourcePills = corpus?.sources ?? [];
+  const [selected, setSelected] = useState<string>(sourcePills[0] ?? "Custom");
+  const [customMode, setCustomMode] = useState(false);
+  const [customText, setCustomText] = useState("");
+  const activeContextLabel = customMode ? customText.trim() || "Custom" : selected;
+  const ctx: ContextType = inferContextType(activeContextLabel);
   const [prompt, setPrompt] = useState("Write a follow-up email to a recruiter after a first interview");
   const [phase, setPhase] = useState<"idle" | "loading" | "result">("idle");
   const [step, setStep] = useState(0);
