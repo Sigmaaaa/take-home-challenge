@@ -71,6 +71,7 @@ function GeneratePage() {
       const base = mockGenerations.find((g) => g.context === ctx) ?? mockGenerations[0];
       const gen: Generation = { ...base, id: `gen-${Date.now()}`, prompt, context: ctx, date: new Date().toISOString().slice(0,10) };
       setResult(gen);
+      setResultLabel(activeContextLabel);
       setPhase("result");
     }, 1500);
   };
