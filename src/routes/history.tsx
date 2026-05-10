@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
+import { DeleteGenerationButton } from "@/components/DeleteGenerationButton";
 
 export const Route = createFileRoute("/history")({
   component: HistoryPage,
