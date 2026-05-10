@@ -185,6 +185,12 @@ function GeneratePage() {
             {phase === "loading" ? "Generating…" : phase === "scoring" ? "Scoring…" : "Generate"}
           </button>
 
+          {dataConfidence === "low" && (
+            <div className="mt-2 text-xs text-warning font-mono">
+              Note: Low corpus confidence may affect output quality. Consider adding more writing samples.
+            </div>
+          )}
+
           {phase === "idle" && (
             <>
               <div className="mt-6 border border-dashed border-border bg-surface/40 p-8">
