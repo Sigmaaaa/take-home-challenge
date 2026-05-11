@@ -88,8 +88,17 @@ function GeneratePage() {
   const activeContextLabel = customMode ? customText.trim() || "custom" : selected;
 
   const onGenerate = async () => {
-    if (!profile?.id) { setError("Style profile not ready yet."); return; }
+    setPromptError(null);
+    if (!prompt.trim()) {
+      setPromptError("Write a prompt first.");
+      return;
+    }
+    if (!profile?.id) {
+      setError("Something went wrong on our end. Try refreshing the page.");
+      return;
+    }
     setError(null);
+    setScoreError(null);
     setPhase("loading");
     setStep(0);
     setOutput("");
@@ -97,11 +106,22 @@ function GeneratePage() {
 
     const interval = setInterval(() => setStep((s) => Math.min(s + 1, LOADER_LINES.length - 1)), 1500);
 
+    const friendlyGenError = (e: any): string => {
+      const msg = String(e?.message || "").toLowerCase();
+      if (msg.includes("required") || msg.includes("style_profile_id") || msg.includes("context_type")) {
+        return "Something went wrong on our end. Try refreshing the page.";
+      }
+      if (msg.includes("timeout") || msg.includes("timed out") || msg.includes("aborted")) {
+        return "This is taking longer than expected. Try again with a shorter prompt.";
+      }
+      return "Generation failed. Check your connection and try again.";
+    };
+
     try {
       const ctxLabel = activeContextLabel;
       const gen = await callFn<any>("generate", {
         style_profile_id: profile.id,
-        prompt,
+        prompt: prompt.trim(),
         context_type: ctxLabel.toLowerCase(),
       });
       clearInterval(interval);
@@ -115,16 +135,16 @@ function GeneratePage() {
       try {
         const sc = await callFn<any>("score", { generation_id: generationId });
         setScore(sc.score ?? sc);
-      } catch (e: any) {
+      } catch {
         setScore(null);
-        setError(`Score failed: ${e?.message || "unknown"}`);
+        setScoreError("Couldn't score this output. The text was saved but the score is unavailable.");
       }
       setPhase("result");
       qc.invalidateQueries({ queryKey: ["history"] });
     } catch (e: any) {
       clearInterval(interval);
       setPhase("idle");
-      setError(e?.message || "Generation failed.");
+      setError(friendlyGenError(e));
     }
   };
 
