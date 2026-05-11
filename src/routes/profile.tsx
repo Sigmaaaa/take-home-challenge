@@ -130,7 +130,7 @@ function ProfilePage() {
         <KV label="Length Variance" value={g.length_variance} low={isLow("length_variance")} />
       </Section>
 
-      <Section title="Mid-Level">
+      <Section title="Mid-Level" low={isLow("mid_level")}>
         <KV label="Sentence Rhythm" value={p.sentence_rhythm} low={isLow("sentence_rhythm")} />
         <KV label="Avg Sentences / Message" value={m.avg_sentences_per_message != null ? String(m.avg_sentences_per_message) : null} mono low={isLow("avg_sentences_per_message")} />
         <KV label="Question Frequency" value={p.question_frequency} mono low={isLow("question_frequency")} />
