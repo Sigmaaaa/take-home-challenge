@@ -92,7 +92,8 @@ export function TerminalLoader({ lines, charCount, apiDone, corpusName, onDone }
       <button
         type="button"
         onClick={showCompletion ? undefined : expand}
-        className="fixed top-5 right-5 z-50 w-[320px] text-left bg-[#1A1A1A] border border-border border-l-2 border-l-indigo px-3 py-2.5 font-mono text-xs animate-[fade-in_0.3s_ease-out] hover:border-l-indigo hover:border-border/80 transition-colors"
+        className="group fixed top-5 right-5 z-50 w-[320px] text-left bg-[#1A1A1A] hover:bg-[#222] border border-border border-l-2 border-l-indigo hover:border-border/80 hover:shadow-[0_0_0_3px_color-mix(in_oklab,var(--indigo)_15%,transparent)] px-3 py-2.5 font-mono text-xs animate-[fade-in_0.3s_ease-out] transition-all cursor-pointer disabled:cursor-default"
+        disabled={showCompletion}
       >
         {showCompletion ? (
           <div className="text-indigo flex items-center gap-2">
@@ -102,11 +103,12 @@ export function TerminalLoader({ lines, charCount, apiDone, corpusName, onDone }
             </span>
           </div>
         ) : (
-          <div className="flex items-center gap-2 text-text-muted">
+          <div className="flex items-center gap-2 text-text-muted group-hover:text-text-primary transition-colors">
             <span className="size-1.5 rounded-full bg-indigo animate-pulse shrink-0" />
             <span className="truncate">
               › {waitingForApi ? elapsedMessage(elapsed) : (lines[shown] ?? "")}
             </span>
+            <span className="ml-auto text-[9px] small-caps text-text-muted group-hover:text-indigo transition-colors shrink-0">expand</span>
           </div>
         )}
       </button>
