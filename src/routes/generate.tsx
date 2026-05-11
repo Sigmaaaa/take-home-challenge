@@ -310,6 +310,11 @@ function GeneratePage() {
                 </div>
               )}
               {phase === "result" && score && <ScoreCard score={score} />}
+              {phase === "result" && !score && scoreError && (
+                <div className="mt-5 border border-border bg-surface p-6 text-center text-sm text-text-muted font-mono">
+                  {scoreError}
+                </div>
+              )}
             </>
           )}
         </div>
