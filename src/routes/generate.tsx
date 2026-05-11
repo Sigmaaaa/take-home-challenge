@@ -178,6 +178,7 @@ function GeneratePage() {
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
+            placeholder={promptPlaceholder}
             className="w-full min-h-[200px] bg-surface border border-border p-3 font-mono text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-indigo resize-y"
           />
 
