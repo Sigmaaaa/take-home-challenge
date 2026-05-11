@@ -348,6 +348,29 @@ function KV({ label, value, mono, low }: { label: string; value?: string | null;
   );
 }
 
+function KVNode({ label, low, children }: { label: string; low?: boolean; children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[180px_1fr] gap-4 py-2.5 border-b border-border last:border-b-0 items-center">
+      <div className="text-[10px] small-caps text-text-muted">{label}{low && <LowMark />}</div>
+      <div>{children}</div>
+    </div>
+  );
+}
+
+function YesNoBadge({ value }: { value: any }) {
+  const yes = value === true;
+  const no = value === false;
+  if (!yes && !no) return <span className="text-text-muted text-xs">—</span>;
+  const cls = yes
+    ? "bg-indigo border-indigo text-white"
+    : "border-border text-text-muted bg-transparent";
+  return (
+    <span className={`inline-block font-mono text-[10px] px-2 py-0.5 border rounded-sm ${cls}`}>
+      {yes ? "YES" : "NO"}
+    </span>
+  );
+}
+
 function Bar({ value }: { value: number }) {
   return (
     <div className="h-1 bg-surface-elevated overflow-hidden rounded-sm">
