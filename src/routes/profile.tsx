@@ -123,11 +123,25 @@ function ProfilePage() {
         <KV label="Overall Tone" value={p.overall_tone} low={isLow("overall_tone")} />
         <KV label="Social Orientation" value={p.social_orientation} low={isLow("social_orientation")} />
         <KV label="Politeness Strategy" value={p.politeness_strategy} low={isLow("politeness_strategy")} />
+        <ChipsRow label="Primary Contexts" items={arr(g.primary_contexts)} tag low={isLow("primary_contexts")} />
+        <KVNode label="Language Mixing" low={isLow("language_mixing")}>
+          <YesNoBadge value={g.language_mixing} />
+        </KVNode>
+        <KV label="Length Variance" value={g.length_variance} low={isLow("length_variance")} />
       </Section>
 
       <Section title="Mid-Level">
         <KV label="Sentence Rhythm" value={p.sentence_rhythm} low={isLow("sentence_rhythm")} />
+        <KV label="Avg Sentences / Message" value={m.avg_sentences_per_message != null ? String(m.avg_sentences_per_message) : null} mono low={isLow("avg_sentences_per_message")} />
         <KV label="Question Frequency" value={p.question_frequency} mono low={isLow("question_frequency")} />
+        <KV label="Paragraph Structure" value={m.paragraph_structure} low={isLow("paragraph_structure")} />
+        <KV label="Context Switching" value={m.context_switching} low={isLow("context_switching")} />
+        <KVNode label="Uses Bullet Points" low={isLow("uses_bullet_points")}>
+          <YesNoBadge value={m.uses_bullet_points} />
+        </KVNode>
+        <KVNode label="Uses Numbered Lists" low={isLow("uses_numbered_lists")}>
+          <YesNoBadge value={m.uses_numbered_lists} />
+        </KVNode>
         <ChipsRow label="Structural Habits" items={arr(p.structural_habits)} tag low={isLow("structural_habits")} />
         <KV label="Information Structure" value={p.information_structure} low={isLow("information_structure")} />
         <KV label="Follow-up Behavior" value={p.follow_up_behavior} low={isLow("follow_up_behavior")} />
@@ -197,6 +211,33 @@ function ProfilePage() {
           </div>
         </div>
 
+        <KV label="Exclamation Frequency" value={l.exclamation_frequency} low={isLow("exclamation_frequency")} />
+        <KV label="Question Mark Style" value={l.question_mark_style} low={isLow("question_mark_style")} />
+        <KV label="Period Usage" value={l.period_usage} low={isLow("period_usage")} />
+        <KV label="Capitalization" value={l.capitalization} low={isLow("capitalization")} />
+        <KV label="Typo Tolerance" value={l.typo_tolerance} low={isLow("typo_tolerance")} />
+        <ChipsRow label="Typo Patterns" items={arr(l.typo_patterns)} low={isLow("typo_patterns")} />
+
+        <div className="py-3 border-b border-border">
+          <div className="text-[10px] small-caps text-text-muted mb-2">Intensifiers{isLow("intensifiers") && <LowMark />}</div>
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {arr(get(l, "intensifiers", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
+          </div>
+          {get(l, "intensifiers", "pattern") && (
+            <p className="text-xs text-text-secondary italic">{get(l, "intensifiers", "pattern")}</p>
+          )}
+        </div>
+
+        <div className="py-3 border-b border-border">
+          <div className="text-[10px] small-caps text-text-muted mb-2">Warmth Markers{isLow("warmth_markers") && <LowMark />}</div>
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {arr(get(l, "warmth_markers", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
+          </div>
+          {get(l, "warmth_markers", "pattern") && (
+            <p className="text-xs text-text-secondary italic">{get(l, "warmth_markers", "pattern")}</p>
+          )}
+        </div>
+
         <div className="py-3">
           <div className="text-[10px] small-caps text-text-muted mb-2">Sign-offs{isLow("sign_offs") && <LowMark />}</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
@@ -206,6 +247,12 @@ function ProfilePage() {
             <p className="text-xs text-text-secondary italic">{get(p, "sign_offs", "pattern")}</p>
           )}
         </div>
+      </Section>
+
+      <Section title="Register Shifts">
+        <ChipsRow label="Formal Triggers" items={arr(get(root, "register_shifts", "formal_triggers"))} low={isLow("formal_triggers")} />
+        <ChipsRow label="Casual Triggers" items={arr(get(root, "register_shifts", "casual_triggers"))} low={isLow("casual_triggers")} />
+        <KV label="Shift Smoothness" value={get(root, "register_shifts", "shift_smoothness")} low={isLow("shift_smoothness")} />
       </Section>
 
       <div className="mt-8 border border-border border-l-[3px] border-l-indigo bg-surface-elevated p-7">
@@ -298,6 +345,29 @@ function KV({ label, value, mono, low }: { label: string; value?: string | null;
       <div className="text-[10px] small-caps text-text-muted pt-0.5">{label}{low && <LowMark />}</div>
       <div className={`text-sm text-text-primary ${mono ? "font-mono" : ""}`}>{value}</div>
     </div>
+  );
+}
+
+function KVNode({ label, low, children }: { label: string; low?: boolean; children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[180px_1fr] gap-4 py-2.5 border-b border-border last:border-b-0 items-center">
+      <div className="text-[10px] small-caps text-text-muted">{label}{low && <LowMark />}</div>
+      <div>{children}</div>
+    </div>
+  );
+}
+
+function YesNoBadge({ value }: { value: any }) {
+  const yes = value === true;
+  const no = value === false;
+  if (!yes && !no) return <span className="text-text-muted text-xs">—</span>;
+  const cls = yes
+    ? "bg-indigo border-indigo text-white"
+    : "border-border text-text-muted bg-transparent";
+  return (
+    <span className={`inline-block font-mono text-[10px] px-2 py-0.5 border rounded-sm ${cls}`}>
+      {yes ? "YES" : "NO"}
+    </span>
   );
 }
 
