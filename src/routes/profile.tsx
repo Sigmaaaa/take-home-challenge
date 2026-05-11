@@ -329,12 +329,13 @@ function Section({ title, children, defaultOpen = false }: { title: string; chil
 
 function LowMark() {
   return (
-    <span
-      className="ml-1 text-warning cursor-help"
+    <sup
+      className="ml-1 cursor-help font-mono text-[10px] align-super"
+      style={{ color: "#F59E0B" }}
       title="Limited evidence in corpus — may not be reliable."
     >
       ~
-    </span>
+    </sup>
   );
 }
 
