@@ -249,8 +249,8 @@ function ProfilePage() {
 }
 
 function PronounBadge({ level }: { level: string }) {
-  const l = level.toLowerCase();
-  const label = (l || "—").toUpperCase();
+  const l = (level || "").toLowerCase();
+  const label = l === "moderate" ? "MED" : l === "high" ? "HIGH" : l === "low" ? "LOW" : "—";
   const cls =
     l === "high"
       ? "bg-indigo border-indigo text-white"
