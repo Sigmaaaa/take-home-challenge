@@ -64,17 +64,41 @@ function GeneratePage() {
   const [score, setScore] = useState<any>(null);
   const [resultLabel, setResultLabel] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [scoreError, setScoreError] = useState<string | null>(null);
+  const [promptError, setPromptError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   if (!activeCorpusId) {
-    return <div className="text-text-secondary text-sm">No corpus. <Link to="/" className="text-indigo">Add one →</Link></div>;
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-32">
+        <div className="text-sm text-text-secondary mb-2">No corpus selected.</div>
+        <div className="text-xs text-text-muted mb-6 max-w-sm">
+          Choose one from the sidebar or upload a new one on the home page.
+        </div>
+        <Link
+          to="/"
+          className="px-4 py-2 text-xs border border-border rounded-sm text-text-secondary hover:text-text-primary hover:border-text-muted"
+        >
+          Go to Home
+        </Link>
+      </div>
+    );
   }
 
   const activeContextLabel = customMode ? customText.trim() || "custom" : selected;
 
   const onGenerate = async () => {
-    if (!profile?.id) { setError("Style profile not ready yet."); return; }
+    setPromptError(null);
+    if (!prompt.trim()) {
+      setPromptError("Write a prompt first.");
+      return;
+    }
+    if (!profile?.id) {
+      setError("Something went wrong on our end. Try refreshing the page.");
+      return;
+    }
     setError(null);
+    setScoreError(null);
     setPhase("loading");
     setStep(0);
     setOutput("");
@@ -82,11 +106,22 @@ function GeneratePage() {
 
     const interval = setInterval(() => setStep((s) => Math.min(s + 1, LOADER_LINES.length - 1)), 1500);
 
+    const friendlyGenError = (e: any): string => {
+      const msg = String(e?.message || "").toLowerCase();
+      if (msg.includes("required") || msg.includes("style_profile_id") || msg.includes("context_type")) {
+        return "Something went wrong on our end. Try refreshing the page.";
+      }
+      if (msg.includes("timeout") || msg.includes("timed out") || msg.includes("aborted")) {
+        return "This is taking longer than expected. Try again with a shorter prompt.";
+      }
+      return "Generation failed. Check your connection and try again.";
+    };
+
     try {
       const ctxLabel = activeContextLabel;
       const gen = await callFn<any>("generate", {
         style_profile_id: profile.id,
-        prompt,
+        prompt: prompt.trim(),
         context_type: ctxLabel.toLowerCase(),
       });
       clearInterval(interval);
@@ -100,16 +135,16 @@ function GeneratePage() {
       try {
         const sc = await callFn<any>("score", { generation_id: generationId });
         setScore(sc.score ?? sc);
-      } catch (e: any) {
+      } catch {
         setScore(null);
-        setError(`Score failed: ${e?.message || "unknown"}`);
+        setScoreError("Couldn't score this output. The text was saved but the score is unavailable.");
       }
       setPhase("result");
       qc.invalidateQueries({ queryKey: ["history"] });
     } catch (e: any) {
       clearInterval(interval);
       setPhase("idle");
-      setError(e?.message || "Generation failed.");
+      setError(friendlyGenError(e));
     }
   };
 
@@ -177,13 +212,17 @@ function GeneratePage() {
           <label className="block text-[10px] small-caps text-text-muted mb-1.5 mt-5">Writing Prompt</label>
           <textarea
             value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+            onChange={(e) => { setPrompt(e.target.value); if (promptError) setPromptError(null); }}
             placeholder={promptPlaceholder}
             className="w-full min-h-[200px] bg-surface border border-border p-3 font-mono text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-indigo resize-y"
           />
 
+          {promptError && (
+            <div className="mt-2 text-xs text-warning font-mono">{promptError}</div>
+          )}
+
           {error && (
-            <div className="mt-3 border border-danger/50 bg-danger/10 text-danger text-xs px-3 py-2 rounded-sm font-mono">
+            <div className="mt-3 border border-warning/40 bg-warning/10 text-warning text-xs px-3 py-2 rounded-sm font-mono">
               {error}
             </div>
           )}
@@ -271,6 +310,11 @@ function GeneratePage() {
                 </div>
               )}
               {phase === "result" && score && <ScoreCard score={score} />}
+              {phase === "result" && !score && scoreError && (
+                <div className="mt-5 border border-border bg-surface p-6 text-center text-sm text-text-muted font-mono">
+                  {scoreError}
+                </div>
+              )}
             </>
           )}
         </div>
