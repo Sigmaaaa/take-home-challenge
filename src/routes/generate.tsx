@@ -64,10 +64,25 @@ function GeneratePage() {
   const [score, setScore] = useState<any>(null);
   const [resultLabel, setResultLabel] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [scoreError, setScoreError] = useState<string | null>(null);
+  const [promptError, setPromptError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   if (!activeCorpusId) {
-    return <div className="text-text-secondary text-sm">No corpus. <Link to="/" className="text-indigo">Add one →</Link></div>;
+    return (
+      <div className="flex flex-col items-center justify-center text-center py-32">
+        <div className="text-sm text-text-secondary mb-2">No corpus selected.</div>
+        <div className="text-xs text-text-muted mb-6 max-w-sm">
+          Choose one from the sidebar or upload a new one on the home page.
+        </div>
+        <Link
+          to="/"
+          className="px-4 py-2 text-xs border border-border rounded-sm text-text-secondary hover:text-text-primary hover:border-text-muted"
+        >
+          Go to Home
+        </Link>
+      </div>
+    );
   }
 
   const activeContextLabel = customMode ? customText.trim() || "custom" : selected;
