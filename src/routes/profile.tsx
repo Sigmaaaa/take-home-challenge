@@ -132,7 +132,16 @@ function ProfilePage() {
 
       <Section title="Mid-Level">
         <KV label="Sentence Rhythm" value={p.sentence_rhythm} low={isLow("sentence_rhythm")} />
+        <KV label="Avg Sentences / Message" value={m.avg_sentences_per_message != null ? String(m.avg_sentences_per_message) : null} mono low={isLow("avg_sentences_per_message")} />
         <KV label="Question Frequency" value={p.question_frequency} mono low={isLow("question_frequency")} />
+        <KV label="Paragraph Structure" value={m.paragraph_structure} low={isLow("paragraph_structure")} />
+        <KV label="Context Switching" value={m.context_switching} low={isLow("context_switching")} />
+        <KVNode label="Uses Bullet Points" low={isLow("uses_bullet_points")}>
+          <YesNoBadge value={m.uses_bullet_points} />
+        </KVNode>
+        <KVNode label="Uses Numbered Lists" low={isLow("uses_numbered_lists")}>
+          <YesNoBadge value={m.uses_numbered_lists} />
+        </KVNode>
         <ChipsRow label="Structural Habits" items={arr(p.structural_habits)} tag low={isLow("structural_habits")} />
         <KV label="Information Structure" value={p.information_structure} low={isLow("information_structure")} />
         <KV label="Follow-up Behavior" value={p.follow_up_behavior} low={isLow("follow_up_behavior")} />
