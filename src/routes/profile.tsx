@@ -228,14 +228,39 @@ function ProfilePage() {
         <div className="mt-4 border border-border bg-surface p-5">
           <div className="text-[10px] small-caps text-text-muted mb-2">Extraction Notes</div>
           {meta.extraction_notes && (
-            <p className="text-xs text-text-secondary leading-relaxed mb-2">{meta.extraction_notes}</p>
+            <p className="text-xs text-text-secondary leading-relaxed mb-3">{meta.extraction_notes}</p>
           )}
           {lowDims.length > 0 && (
-            <div className="text-[11px] font-mono text-warning">~{lowDims.length} dimensions flagged as low confidence</div>
+            <div>
+              <div className="text-[11px] font-mono text-warning mb-2">~{lowDims.length} dimensions flagged as low confidence:</div>
+              <div className="flex flex-wrap gap-1.5">
+                {lowDims.map((d) => (
+                  <span key={d} className="inline-block font-mono text-[11px] px-2 py-0.5 border border-warning/40 bg-warning/10 text-warning rounded-sm">
+                    ~{d}
+                  </span>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       )}
     </div>
+  );
+}
+
+function PronounBadge({ level }: { level: string }) {
+  const l = level.toLowerCase();
+  const label = (l || "—").toUpperCase();
+  const cls =
+    l === "high"
+      ? "bg-indigo border-indigo text-white"
+      : l === "moderate"
+      ? "border-indigo text-indigo bg-transparent"
+      : "border-border text-text-muted bg-transparent";
+  return (
+    <span className={`inline-block font-mono text-[10px] px-2 py-0.5 border rounded-sm ${cls}`}>
+      {label}
+    </span>
   );
 }
 
