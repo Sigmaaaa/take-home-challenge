@@ -311,7 +311,7 @@ function PronounBadge({ level }: { level: string }) {
   );
 }
 
-function Section({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+function Section({ title, children, defaultOpen = false, low = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean; low?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="border border-border bg-surface mb-3">
@@ -319,7 +319,7 @@ function Section({ title, children, defaultOpen = false }: { title: string; chil
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-surface-elevated transition-colors"
       >
-        <span className="text-sm text-text-primary text-tight">{title}</span>
+        <span className="text-sm text-text-primary text-tight">{title}{low && <LowMark />}</span>
         {open ? <ChevronDown className="size-4 text-text-muted" /> : <ChevronRight className="size-4 text-text-muted" />}
       </button>
       {open && <div className="px-5 pb-4 border-t border-border">{children}</div>}
