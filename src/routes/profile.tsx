@@ -187,14 +187,11 @@ function ProfilePage() {
 
         <div className="py-3 border-b border-border">
           <div className="text-[10px] small-caps text-text-muted mb-3">Pronoun Ratio{isLow("pronoun_ratio") && <LowMark />}</div>
-          <div className="grid grid-cols-3 gap-3">
-            {([["I", pronI], ["you", pronYou], ["we", pronWe]] as const).map(([k, v]) => (
-              <div key={k}>
-                <div className="flex justify-between mb-1">
-                  <span className="font-mono text-xs text-text-secondary">{k}</span>
-                  <span className="font-mono text-xs text-text-primary">{(v * 100).toFixed(0)}%</span>
-                </div>
-                <Bar value={v} />
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {([["I", pron.I ?? pron.i ?? pron.first_person], ["you", pron.you ?? pron.second_person], ["we", pron.we ?? pron.first_person_plural]] as const).map(([k, v]) => (
+              <div key={k} className="flex items-center gap-2">
+                <span className="font-mono text-xs text-text-secondary">{k}</span>
+                <PronounBadge level={typeof v === "string" ? v : ""} />
               </div>
             ))}
           </div>
