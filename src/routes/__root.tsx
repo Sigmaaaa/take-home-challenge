@@ -11,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { AppSidebar } from "@/components/AppSidebar";
 import { GlobalExtractionLoader } from "@/components/GlobalExtractionLoader";
+import { WelcomeModal } from "@/components/WelcomeModal";
 
 function NotFoundComponent() {
   return (
@@ -114,6 +115,7 @@ function RootComponent() {
         </main>
       </div>
       <GlobalExtractionLoader />
+      <WelcomeModal />
     </QueryClientProvider>
   );
 }
