@@ -211,6 +211,33 @@ function ProfilePage() {
           </div>
         </div>
 
+        <KV label="Exclamation Frequency" value={l.exclamation_frequency} low={isLow("exclamation_frequency")} />
+        <KV label="Question Mark Style" value={l.question_mark_style} low={isLow("question_mark_style")} />
+        <KV label="Period Usage" value={l.period_usage} low={isLow("period_usage")} />
+        <KV label="Capitalization" value={l.capitalization} low={isLow("capitalization")} />
+        <KV label="Typo Tolerance" value={l.typo_tolerance} low={isLow("typo_tolerance")} />
+        <ChipsRow label="Typo Patterns" items={arr(l.typo_patterns)} low={isLow("typo_patterns")} />
+
+        <div className="py-3 border-b border-border">
+          <div className="text-[10px] small-caps text-text-muted mb-2">Intensifiers{isLow("intensifiers") && <LowMark />}</div>
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {arr(get(l, "intensifiers", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
+          </div>
+          {get(l, "intensifiers", "pattern") && (
+            <p className="text-xs text-text-secondary italic">{get(l, "intensifiers", "pattern")}</p>
+          )}
+        </div>
+
+        <div className="py-3 border-b border-border">
+          <div className="text-[10px] small-caps text-text-muted mb-2">Warmth Markers{isLow("warmth_markers") && <LowMark />}</div>
+          <div className="flex flex-wrap gap-1.5 mb-2">
+            {arr(get(l, "warmth_markers", "examples")).map((e) => <Chip key={e}>{e}</Chip>)}
+          </div>
+          {get(l, "warmth_markers", "pattern") && (
+            <p className="text-xs text-text-secondary italic">{get(l, "warmth_markers", "pattern")}</p>
+          )}
+        </div>
+
         <div className="py-3">
           <div className="text-[10px] small-caps text-text-muted mb-2">Sign-offs{isLow("sign_offs") && <LowMark />}</div>
           <div className="flex flex-wrap gap-1.5 mb-2">
@@ -220,6 +247,12 @@ function ProfilePage() {
             <p className="text-xs text-text-secondary italic">{get(p, "sign_offs", "pattern")}</p>
           )}
         </div>
+      </Section>
+
+      <Section title="Register Shifts">
+        <ChipsRow label="Formal Triggers" items={arr(get(root, "register_shifts", "formal_triggers"))} low={isLow("formal_triggers")} />
+        <ChipsRow label="Casual Triggers" items={arr(get(root, "register_shifts", "casual_triggers"))} low={isLow("casual_triggers")} />
+        <KV label="Shift Smoothness" value={get(root, "register_shifts", "shift_smoothness")} low={isLow("shift_smoothness")} />
       </Section>
 
       <div className="mt-8 border border-border border-l-[3px] border-l-indigo bg-surface-elevated p-7">
