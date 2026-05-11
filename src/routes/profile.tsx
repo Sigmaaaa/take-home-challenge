@@ -110,7 +110,7 @@ function ProfilePage() {
         </div>
       )}
 
-      <Section title="Global" defaultOpen>
+      <Section title="Global" defaultOpen low={isLow("global")}>
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] small-caps text-text-muted">Formality Score{isLow("formality_score") && <LowMark />}</span>
