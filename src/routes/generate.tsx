@@ -341,17 +341,18 @@ function ScoreCard({ score }: { score: any }) {
 
       {score?.data_quality && (() => {
         const dq = score.data_quality;
-        const conf = String(dq.confidence ?? "").toUpperCase();
+        const conf = String(dq.data_confidence ?? "").toUpperCase();
         const confColor = conf === "HIGH" ? "text-success" : conf === "MEDIUM" ? "text-warning" : conf === "LOW" ? "text-danger" : "text-text-secondary";
+        const total = dq.total_features ?? 7;
         return (
           <div className="mt-5 border-t border-border pt-4">
             <div className="text-[10px] small-caps text-text-muted mb-2">Data Quality</div>
             <div className="text-xs font-mono text-text-secondary">
-              Corpus: {dq.message_count ?? dq.messages ?? "—"} messages · Confidence: <span className={confColor}>{conf || "—"}</span>
+              Corpus: {dq.n_messages ?? "—"} messages · Confidence: <span className={confColor}>{conf || "—"}</span>
             </div>
             {(dq.reliable_features != null) && (
               <div className="text-xs font-mono text-text-secondary mt-1">
-                Reliable features: {dq.reliable_features}/7
+                Reliable features: {dq.reliable_features}/{total}
               </div>
             )}
             {dq.note && (
