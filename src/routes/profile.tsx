@@ -70,7 +70,7 @@ function ProfilePage() {
 
   const dateStr = c.created_at ? new Date(c.created_at).toISOString().slice(0, 10) : "";
 
-  const meta = data.profile?.extraction_metadata as any;
+  const meta = (root as any)?.extraction_metadata as any;
   const confidence = meta?.data_confidence as "low" | "medium" | "high" | undefined;
   const lowDims: string[] = Array.isArray(meta?.low_confidence_dimensions) ? meta.low_confidence_dimensions : [];
   const isLow = (key: string) => lowDims.includes(key);
