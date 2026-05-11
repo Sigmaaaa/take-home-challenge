@@ -171,7 +171,7 @@ function ProfilePage() {
         </div>
       </Section>
 
-      <Section title="Local">
+      <Section title="Local" low={isLow("local")}>
         <div className="py-3 border-b border-border">
           <div className="text-[10px] small-caps text-text-muted mb-2">Emoji Usage{(isLow("emoji_usage") || isLow("emoji_style")) && <LowMark />}</div>
           {p.emoji_usage && <p className="text-sm text-text-primary mb-2">{p.emoji_usage}</p>}
