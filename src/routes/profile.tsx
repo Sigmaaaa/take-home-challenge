@@ -220,6 +220,8 @@ function ProfilePage() {
         <KV label="Period Usage" value={l.period_usage} low={isLow("period_usage")} />
         <KV label="Capitalization" value={l.capitalization} low={isLow("capitalization")} />
         <KV label="Typo Tolerance" value={l.typo_tolerance} low={isLow("typo_tolerance")} />
+        <KV label="Comma Usage" value={l.comma_usage} low={isLow("comma_usage")} />
+        <KV label="Humor Style" value={l.humor_style} low={isLow("humor_style")} />
         <ChipsRow label="Typo Patterns" items={arr(l.typo_patterns)} low={isLow("typo_patterns")} />
 
         <div className="py-3 border-b border-border">
