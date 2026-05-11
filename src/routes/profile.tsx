@@ -255,7 +255,7 @@ function ProfilePage() {
         </div>
       </Section>
 
-      <Section title="Register Shifts">
+      <Section title="Register Shifts" low={isLow("register_shifts")}>
         <ChipsRow label="Formal Triggers" items={arr(get(root, "register_shifts", "formal_triggers"))} low={isLow("formal_triggers")} />
         <ChipsRow label="Casual Triggers" items={arr(get(root, "register_shifts", "casual_triggers"))} low={isLow("casual_triggers")} />
         <KV label="Shift Smoothness" value={get(root, "register_shifts", "shift_smoothness")} low={isLow("shift_smoothness")} />
