@@ -47,7 +47,17 @@ function GeneratePage() {
   const [selected, setSelected] = useState<string>(SOURCE_PILLS[0]);
   const [customMode, setCustomMode] = useState(false);
   const [customText, setCustomText] = useState("");
-  const [prompt, setPrompt] = useState("Write a follow-up email to a recruiter after a first interview");
+  const [prompt, setPrompt] = useState("");
+
+  const PLACEHOLDERS: Record<string, string> = {
+    Email: "Write a follow-up email to a recruiter after a first interview...",
+    Slack: "Ask your team if the new pipeline is ready to test...",
+    WhatsApp: "Text a close friend you haven't seen in a while...",
+    Text: "Text a close friend you haven't seen in a while...",
+  };
+  const promptPlaceholder = customMode
+    ? "Describe what you want to write..."
+    : PLACEHOLDERS[selected] ?? "Describe what you want to write...";
   const [phase, setPhase] = useState<"idle" | "loading" | "scoring" | "result">("idle");
   const [step, setStep] = useState(0);
   const [output, setOutput] = useState<string>("");
