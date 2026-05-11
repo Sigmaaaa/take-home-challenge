@@ -7,7 +7,7 @@
 ![Claude](https://img.shields.io/badge/Claude-191919?style=flat&logo=anthropic&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
 
-**[Live Demo](https://rezapleasehirehim.com)** · **[Colab Notebook](./colab/scorer.ipynb)**
+**[Live Demo](https://rzagpt.xyz/)** · **[Colab Notebook](./colab/scorer.ipynb)**
 
 ---
 
