@@ -116,7 +116,7 @@ function GeneratePage() {
   const flat = { ...g, ...m } as any;
   const formality = Number(g.formality_score ?? profile?.formality_score ?? 0);
   const cog = profileRoot?.cognitive_spike ?? {};
-  const dataConfidence = (profile as any)?.extraction_metadata?.data_confidence as "low" | "medium" | "high" | undefined;
+  const dataConfidence = (profileRoot as any)?.extraction_metadata?.data_confidence as "low" | "medium" | "high" | undefined;
 
   return (
     <div className="pb-20">
