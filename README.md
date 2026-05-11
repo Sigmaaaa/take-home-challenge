@@ -222,6 +222,8 @@ Both the programmatic scorer and style embedding use **register-matched comparis
 
 **Lovable** built the entire frontend. The design brief specified a dark research-tool aesthetic inspired by Linear and Perplexity, with a terminal-style loading animation tied to real API timing, a collapsible profile display, and a three-layer score breakdown.
 
+On the profile display, the UI deliberately surfaces the full 34-dimension profile rather than a summarized view. That is a conscious demo decision: here the evaluators are the users, and exposing the complete extracted fingerprint is more valuable than hiding it behind a polished summary card. A consumer-facing version would likely compress this into a few top-line signals, with the full profile available only in an advanced view. The current display is completionist by design.
+
 ### Development Order
 
 1. Designed the style profile schema before writing any code
