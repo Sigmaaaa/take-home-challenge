@@ -14,10 +14,20 @@ type ScoreRequest = {
 };
 
 type RegisterMessages = Record<string, string[]>;
+type ScorePayload = Record<string, unknown>;
 
 type NumericStat = {
   mean: number;
   std: number;
+  n: number;
+  ci: number;
+  reliable: boolean;
+};
+
+type BinaryRateStat = {
+  rate: number;
+  reliable: boolean;
+  n: number;
 };
 
 type RegisterStats = {
@@ -25,8 +35,8 @@ type RegisterStats = {
   period: NumericStat;
   question: NumericStat;
   sentence_length: NumericStat;
-  emoji_rate: number;
-  doubling_rate: number;
+  emoji_rate: BinaryRateStat;
+  doubling_rate: BinaryRateStat;
 } | null;
 
 const isNonEmptyString = (value: unknown): value is string =>
@@ -54,6 +64,12 @@ const std = (arr: number[]) => {
     0.001,
   );
 };
+
+const ci = (stdVal: number, n: number) =>
+  1.96 * stdVal / Math.sqrt(Math.max(n, 1));
+
+const reliable = (meanVal: number, ciVal: number) =>
+  meanVal === 0 ? false : ciVal < meanVal * 0.5;
 
 function parseCorpusByRegister(rawText: string): RegisterMessages {
   const sections: RegisterMessages = {
@@ -130,13 +146,57 @@ function computeStats(messages: string[]): RegisterStats {
     stats.doubling.push((msg.match(doublingRegex) || []).length > 0 ? 1 : 0);
   }
 
+  const n = messages.length;
+  const exclamationMean = mean(stats.excl);
+  const exclamationStd = std(stats.excl);
+  const exclamationCi = ci(exclamationStd, n);
+
+  const periodMean = mean(stats.periods);
+  const periodStd = std(stats.periods);
+  const periodCi = ci(periodStd, n);
+
+  const questionMean = mean(stats.questions);
+  const questionStd = std(stats.questions);
+  const questionCi = ci(questionStd, n);
+
+  const sentenceLengthMean = mean(stats.lengths);
+  const sentenceLengthStd = std(stats.lengths);
+  const sentenceLengthCi = ci(sentenceLengthStd, n);
+
+  const emojiRate = mean(stats.emoji);
+  const doublingRate = mean(stats.doubling);
+
   return {
-    exclamation: { mean: mean(stats.excl), std: std(stats.excl) },
-    period: { mean: mean(stats.periods), std: std(stats.periods) },
-    question: { mean: mean(stats.questions), std: std(stats.questions) },
-    sentence_length: { mean: mean(stats.lengths), std: std(stats.lengths) },
-    emoji_rate: mean(stats.emoji),
-    doubling_rate: mean(stats.doubling),
+    exclamation: {
+      mean: exclamationMean,
+      std: exclamationStd,
+      n,
+      ci: exclamationCi,
+      reliable: reliable(exclamationMean, exclamationCi),
+    },
+    period: {
+      mean: periodMean,
+      std: periodStd,
+      n,
+      ci: periodCi,
+      reliable: reliable(periodMean, periodCi),
+    },
+    question: {
+      mean: questionMean,
+      std: questionStd,
+      n,
+      ci: questionCi,
+      reliable: reliable(questionMean, questionCi),
+    },
+    sentence_length: {
+      mean: sentenceLengthMean,
+      std: sentenceLengthStd,
+      n,
+      ci: sentenceLengthCi,
+      reliable: reliable(sentenceLengthMean, sentenceLengthCi),
+    },
+    emoji_rate: { rate: emojiRate, reliable: n >= 15, n },
+    doubling_rate: { rate: doublingRate, reliable: n >= 15, n },
   };
 }
 
@@ -179,7 +239,13 @@ function scoreProgrammatic(
   const stats = statsByRegister[register] ?? statsByRegister.GLOBAL;
 
   if (!stats) {
-    return { score: 0.5, breakdown: {}, register_used: register };
+    return {
+      score: 0.5,
+      breakdown: {},
+      register_used: register,
+      reliable_feature_count: 0,
+      total_features: 7,
+    };
   }
 
   const emojiRegex =
@@ -219,18 +285,44 @@ function scoreProgrammatic(
   ) {
     bd.emoji_present = hasEmoji ? 1.0 : 0.3;
   } else {
-    bd.emoji_present = binaryScore(hasEmoji, stats.emoji_rate);
+    bd.emoji_present = binaryScore(hasEmoji, stats.emoji_rate.rate);
   }
 
   bd.doubling_pattern = binaryScore(
     (output.match(doublingRegex) || []).length > 0 ? 1 : 0,
-    stats.doubling_rate,
+    stats.doubling_rate.rate,
   );
   bd.hedging_present = hedgeScore(output);
 
-  const values = Object.values(bd);
-  const score = values.reduce((a, b) => a + b, 0) / values.length;
-  return { score, breakdown: bd, register_used: register };
+  const featureReliability: Record<string, boolean> = {
+    exclamation_density: stats.exclamation.reliable,
+    period_usage: stats.period.reliable,
+    question_frequency: stats.question.reliable,
+    sentence_length: stats.sentence_length.reliable,
+    emoji_present: stats.emoji_rate.reliable,
+    doubling_pattern: stats.doubling_rate.reliable,
+    hedging_present: true,
+  };
+
+  const reliableScores = Object.entries(bd)
+    .filter(([key]) => featureReliability[key] !== false)
+    .map(([, value]) => value);
+
+  const score = reliableScores.length > 0
+    ? reliableScores.reduce((a, b) => a + b, 0) / reliableScores.length
+    : 0.5;
+
+  const reliableFeatureCount = Object.values(featureReliability)
+    .filter(Boolean)
+    .length;
+
+  return {
+    score,
+    breakdown: bd,
+    register_used: register,
+    reliable_feature_count: reliableFeatureCount,
+    total_features: 7,
+  };
 }
 
 const getTextFromAnthropicResponse = (payload: unknown) => {
@@ -400,15 +492,60 @@ async function scoreStyleEmbedding(output: string, corpusSamples: string[]) {
   }
 }
 
-function getWeights(_contextType: string, corpusSize: number, embeddingAvailable: boolean) {
-  const minReliable = 50;
-  const ratio = Math.min(corpusSize / minReliable, 1);
-  const progWeight = 0.35 * ratio;
+function getWeights(
+  _contextType: string,
+  n: number,
+  embeddingAvailable: boolean,
+  reliableFeatureCount: number,
+) {
+  const dataRatio = Math.min(n / 50, 1);
+  const reliabilityRatio = Math.min(reliableFeatureCount / 7, 1);
+  const progWeight = 0.35 * dataRatio * reliabilityRatio;
+  const llmWeight = 0.30 + (0.35 - progWeight);
 
   if (!embeddingAvailable) {
-    return { embedding: 0, programmatic: progWeight + 0.175, llm: 0.30 + 0.175 };
+    return {
+      embedding: 0,
+      programmatic: progWeight + 0.175,
+      llm: llmWeight + 0.175,
+    };
   }
-  return { embedding: 0.35, programmatic: progWeight, llm: 0.30 + (0.35 - progWeight) };
+  return { embedding: 0.35, programmatic: progWeight, llm: llmWeight };
+}
+
+async function scoreWithLLMOnly(
+  generation: { output: string; context_type: string },
+  profile: { profile: any },
+  corpusSourceType: string,
+) {
+  const llmResult = await scoreLLMJudge(generation.output, profile.profile);
+  return {
+    overall_score: Math.round(llmResult.score * 1000) / 1000,
+    weights_used: { embedding: 0, programmatic: 0, llm: 1 },
+    register_used: inferRegister(generation.context_type),
+    register_sample_count: 0,
+    source_type: corpusSourceType,
+    data_quality: {
+      n_messages: 0,
+      data_confidence: "low",
+      reliable_features: 0,
+      total_features: 7,
+      note: "Corpus samples unavailable - using LLM judge only",
+    },
+    style_embedding: {
+      score: null,
+      available: false,
+      error: "corpus_samples unavailable",
+    },
+    programmatic: {
+      score: null,
+      skipped: true,
+      reason: "corpus_samples unavailable",
+      reliable_feature_count: 0,
+      total_features: 7,
+    },
+    llm_judge: llmResult,
+  } satisfies ScorePayload;
 }
 
 Deno.serve(async (req) => {
@@ -503,7 +640,7 @@ Deno.serve(async (req) => {
 
     const { data: corpus, error: corpusError } = await supabase
       .from("corpora")
-      .select("id, raw_text, source_type")
+      .select("id, source_type, corpus_samples, corpus_stats")
       .eq("id", profile.corpus_id)
       .maybeSingle();
 
@@ -521,18 +658,40 @@ Deno.serve(async (req) => {
       );
     }
 
-    const messagesByRegister = parseCorpusByRegister(corpus.raw_text);
+    const corpusSamplesByRegister = corpus.corpus_samples as RegisterMessages | null;
+    const sampleValues = corpusSamplesByRegister ? Object.values(corpusSamplesByRegister) : [];
+    const hasSamples = sampleValues.some((msgs) => Array.isArray(msgs) && msgs.length > 0);
+
+    if (!corpusSamplesByRegister || !hasSamples) {
+      const scorePayload = await scoreWithLLMOnly(generation, profile, corpus.source_type);
+
+      const { error: updateError } = await supabase
+        .from("generations")
+        .update({ score: scorePayload })
+        .eq("id", generationId);
+
+      if (updateError) {
+        return new Response(
+          JSON.stringify({ error: updateError.message }),
+          { status: 500, headers: corsHeaders },
+        );
+      }
+
+      return new Response(JSON.stringify(scorePayload), {
+        status: 200,
+        headers: corsHeaders,
+      });
+    }
+
     const statsByRegister: Record<string, RegisterStats> = {};
-    for (const [reg, msgs] of Object.entries(messagesByRegister)) {
+    for (const [reg, msgs] of Object.entries(corpusSamplesByRegister)) {
       statsByRegister[reg] = computeStats(msgs);
     }
 
     const register = inferRegister(generation.context_type);
-    const registerSamples = (messagesByRegister[register]?.length ?? 0) >= 10
-      ? messagesByRegister[register]
-      : messagesByRegister.GLOBAL;
-    const step = Math.max(1, Math.floor(registerSamples.length / 15));
-    const corpusSamples = registerSamples.filter((_, i) => i % step === 0).slice(0, 15);
+    const registerSamples = (corpusSamplesByRegister[register]?.length ?? 0) >= 5
+      ? corpusSamplesByRegister[register]
+      : corpusSamplesByRegister.GLOBAL ?? [];
 
     const [progResult, llmResult, embResult] = await Promise.all([
       Promise.resolve(
@@ -544,13 +703,14 @@ Deno.serve(async (req) => {
         ),
       ),
       scoreLLMJudge(generation.output, profile.profile),
-      scoreStyleEmbedding(generation.output, corpusSamples),
+      scoreStyleEmbedding(generation.output, registerSamples),
     ]);
 
     const weights = getWeights(
       generation.context_type,
       registerSamples.length,
       embResult.available,
+      progResult.reliable_feature_count,
     );
     const embScore = embResult.available && embResult.score !== null ? embResult.score : 0;
     const overall =
@@ -558,12 +718,30 @@ Deno.serve(async (req) => {
       progResult.score * weights.programmatic +
       llmResult.score * weights.llm;
 
+    const nMessages = registerSamples.length;
+    const dataQuality = {
+      n_messages: nMessages,
+      data_confidence: nMessages >= 50
+        ? "high"
+        : nMessages >= 20
+        ? "medium"
+        : "low",
+      reliable_features: progResult.reliable_feature_count,
+      total_features: 7,
+      note: nMessages < 20
+        ? "Small corpus - programmatic scorer down-weighted, LLM judge prioritized"
+        : nMessages < 50
+        ? "Medium corpus - some features may have wide confidence intervals"
+        : "Sufficient data for reliable scoring across all dimensions",
+    };
+
     const scorePayload = {
       overall_score: Math.round(overall * 1000) / 1000,
       weights_used: weights,
       register_used: register,
       register_sample_count: registerSamples.length,
       source_type: corpus.source_type,
+      data_quality: dataQuality,
       style_embedding: embResult,
       programmatic: progResult,
       llm_judge: llmResult,
