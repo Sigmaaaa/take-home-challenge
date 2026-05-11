@@ -123,6 +123,11 @@ function ProfilePage() {
         <KV label="Overall Tone" value={p.overall_tone} low={isLow("overall_tone")} />
         <KV label="Social Orientation" value={p.social_orientation} low={isLow("social_orientation")} />
         <KV label="Politeness Strategy" value={p.politeness_strategy} low={isLow("politeness_strategy")} />
+        <ChipsRow label="Primary Contexts" items={arr(g.primary_contexts)} tag low={isLow("primary_contexts")} />
+        <KVNode label="Language Mixing" low={isLow("language_mixing")}>
+          <YesNoBadge value={g.language_mixing} />
+        </KVNode>
+        <KV label="Length Variance" value={g.length_variance} low={isLow("length_variance")} />
       </Section>
 
       <Section title="Mid-Level">
