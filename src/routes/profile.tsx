@@ -145,6 +145,10 @@ function ProfilePage() {
         <ChipsRow label="Structural Habits" items={arr(p.structural_habits)} tag low={isLow("structural_habits")} />
         <KV label="Information Structure" value={p.information_structure} low={isLow("information_structure")} />
         <KV label="Follow-up Behavior" value={p.follow_up_behavior} low={isLow("follow_up_behavior")} />
+        <KVNode label="Rhetorical Questions" low={isLow("rhetorical_questions")}>
+          <YesNoBadge value={m.rhetorical_questions} />
+        </KVNode>
+        <KV label="Social Maintenance" value={m.social_maintenance_frequency} low={isLow("social_maintenance_frequency")} />
 
         <div className="py-3 border-b border-border">
           <div className="text-[10px] small-caps text-text-muted mb-2">Openers{isLow("opener_patterns") && <LowMark />}</div>
