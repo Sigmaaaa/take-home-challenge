@@ -47,7 +47,17 @@ function GeneratePage() {
   const [selected, setSelected] = useState<string>(SOURCE_PILLS[0]);
   const [customMode, setCustomMode] = useState(false);
   const [customText, setCustomText] = useState("");
-  const [prompt, setPrompt] = useState("Write a follow-up email to a recruiter after a first interview");
+  const [prompt, setPrompt] = useState("");
+
+  const PLACEHOLDERS: Record<string, string> = {
+    Email: "Write a follow-up email to a recruiter after a first interview...",
+    Slack: "Ask your team if the new pipeline is ready to test...",
+    WhatsApp: "Text a close friend you haven't seen in a while...",
+    Text: "Text a close friend you haven't seen in a while...",
+  };
+  const promptPlaceholder = customMode
+    ? "Describe what you want to write..."
+    : PLACEHOLDERS[selected] ?? "Describe what you want to write...";
   const [phase, setPhase] = useState<"idle" | "loading" | "scoring" | "result">("idle");
   const [step, setStep] = useState(0);
   const [output, setOutput] = useState<string>("");
@@ -168,6 +178,7 @@ function GeneratePage() {
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
+            placeholder={promptPlaceholder}
             className="w-full min-h-[200px] bg-surface border border-border p-3 font-mono text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-indigo resize-y"
           />
 
