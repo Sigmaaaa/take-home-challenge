@@ -110,7 +110,7 @@ function ProfilePage() {
         </div>
       )}
 
-      <Section title="Global" defaultOpen>
+      <Section title="Global" defaultOpen low={isLow("global")}>
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[10px] small-caps text-text-muted">Formality Score{isLow("formality_score") && <LowMark />}</span>
@@ -130,7 +130,7 @@ function ProfilePage() {
         <KV label="Length Variance" value={g.length_variance} low={isLow("length_variance")} />
       </Section>
 
-      <Section title="Mid-Level">
+      <Section title="Mid-Level" low={isLow("mid_level")}>
         <KV label="Sentence Rhythm" value={p.sentence_rhythm} low={isLow("sentence_rhythm")} />
         <KV label="Avg Sentences / Message" value={m.avg_sentences_per_message != null ? String(m.avg_sentences_per_message) : null} mono low={isLow("avg_sentences_per_message")} />
         <KV label="Question Frequency" value={p.question_frequency} mono low={isLow("question_frequency")} />
@@ -145,6 +145,10 @@ function ProfilePage() {
         <ChipsRow label="Structural Habits" items={arr(p.structural_habits)} tag low={isLow("structural_habits")} />
         <KV label="Information Structure" value={p.information_structure} low={isLow("information_structure")} />
         <KV label="Follow-up Behavior" value={p.follow_up_behavior} low={isLow("follow_up_behavior")} />
+        <KVNode label="Rhetorical Questions" low={isLow("rhetorical_questions")}>
+          <YesNoBadge value={m.rhetorical_questions} />
+        </KVNode>
+        <KV label="Social Maintenance" value={m.social_maintenance_frequency} low={isLow("social_maintenance_frequency")} />
 
         <div className="py-3 border-b border-border">
           <div className="text-[10px] small-caps text-text-muted mb-2">Openers{isLow("opener_patterns") && <LowMark />}</div>
@@ -167,7 +171,7 @@ function ProfilePage() {
         </div>
       </Section>
 
-      <Section title="Local">
+      <Section title="Local" low={isLow("local")}>
         <div className="py-3 border-b border-border">
           <div className="text-[10px] small-caps text-text-muted mb-2">Emoji Usage{(isLow("emoji_usage") || isLow("emoji_style")) && <LowMark />}</div>
           {p.emoji_usage && <p className="text-sm text-text-primary mb-2">{p.emoji_usage}</p>}
@@ -216,6 +220,8 @@ function ProfilePage() {
         <KV label="Period Usage" value={l.period_usage} low={isLow("period_usage")} />
         <KV label="Capitalization" value={l.capitalization} low={isLow("capitalization")} />
         <KV label="Typo Tolerance" value={l.typo_tolerance} low={isLow("typo_tolerance")} />
+        <KV label="Comma Usage" value={l.comma_usage} low={isLow("comma_usage")} />
+        <KV label="Humor Style" value={l.humor_style} low={isLow("humor_style")} />
         <ChipsRow label="Typo Patterns" items={arr(l.typo_patterns)} low={isLow("typo_patterns")} />
 
         <div className="py-3 border-b border-border">
@@ -249,7 +255,7 @@ function ProfilePage() {
         </div>
       </Section>
 
-      <Section title="Register Shifts">
+      <Section title="Register Shifts" low={isLow("register_shifts")}>
         <ChipsRow label="Formal Triggers" items={arr(get(root, "register_shifts", "formal_triggers"))} low={isLow("formal_triggers")} />
         <ChipsRow label="Casual Triggers" items={arr(get(root, "register_shifts", "casual_triggers"))} low={isLow("casual_triggers")} />
         <KV label="Shift Smoothness" value={get(root, "register_shifts", "shift_smoothness")} low={isLow("shift_smoothness")} />
@@ -311,7 +317,7 @@ function PronounBadge({ level }: { level: string }) {
   );
 }
 
-function Section({ title, children, defaultOpen = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean }) {
+function Section({ title, children, defaultOpen = false, low = false }: { title: string; children: React.ReactNode; defaultOpen?: boolean; low?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="border border-border bg-surface mb-3">
@@ -319,7 +325,7 @@ function Section({ title, children, defaultOpen = false }: { title: string; chil
         onClick={() => setOpen(!open)}
         className="w-full flex items-center justify-between px-5 py-3.5 text-left hover:bg-surface-elevated transition-colors"
       >
-        <span className="text-sm text-text-primary text-tight">{title}</span>
+        <span className="text-sm text-text-primary text-tight">{title}{low && <LowMark />}</span>
         {open ? <ChevronDown className="size-4 text-text-muted" /> : <ChevronRight className="size-4 text-text-muted" />}
       </button>
       {open && <div className="px-5 pb-4 border-t border-border">{children}</div>}
@@ -329,12 +335,13 @@ function Section({ title, children, defaultOpen = false }: { title: string; chil
 
 function LowMark() {
   return (
-    <span
-      className="ml-1 text-warning cursor-help"
+    <sup
+      className="ml-1 cursor-help font-mono text-[10px] align-super"
+      style={{ color: "#F59E0B" }}
       title="Limited evidence in corpus — may not be reliable."
     >
       ~
-    </span>
+    </sup>
   );
 }
 
