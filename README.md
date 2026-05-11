@@ -216,13 +216,13 @@ Both the programmatic scorer and style embedding use **register-matched comparis
 
 ### AI Tooling
 
-**Claude** was the thinking partner for the entire architecture. The psycholinguistic framing, profile schema design, scoring methodology, and every prompt in the system were developed conversationally before a single line of code was written. Claude also runs inside the app for extraction, generation, and LLM judging. Claude was chosen over other models for its superior natural language generation and instruction-following precision, both of which matter enormously when output quality is the product.
+**Claude** was the thinking partner for the entire architecture. The psycholinguistic framing, profile schema design, scoring methodology, and every prompt in the system were developed  before a single line of code was written. Claude also runs inside the app for extraction, generation, and LLM judging. Claude was chosen over other models for its superior natural language generation and instruction-following precision, both of which matter enormously when output quality is the product.
 
 **Codex** handled all backend implementation. The six Edge Functions, Supabase schema, RLS policies, and deployment were written and iterated by Codex connected to the repo via MCP. The Supabase MCP connection meant Codex could create tables, run migrations, and verify deployments directly without copy-pasting SQL.
 
 **Lovable** built the entire frontend. The design brief specified a dark research-tool aesthetic inspired by Linear and Perplexity, with a terminal-style loading animation tied to real API timing, a collapsible profile display, and a three-layer score breakdown.
 
-On the profile display, the UI deliberately surfaces the full 34-dimension profile rather than a summarized view. That is a conscious demo decision: here the evaluators are the users, and exposing the complete extracted fingerprint is more valuable than hiding it behind a polished summary card. A consumer-facing version would likely compress this into a few top-line signals, with the full profile available only in an advanced view. The current display is completionist by design.
+⚠ On the profile display, the UI deliberately surfaces the full 34-dimension profile rather than a summarized view. That is a conscious demo decision: here the evaluators are the users, and exposing the complete extracted fingerprint is more valuable than hiding it behind a polished summary card. A consumer-facing version would likely compress this into a few top-line signals, with the full profile available only in an advanced view. The current display is completionist by design.
 
 ### Development Order
 
