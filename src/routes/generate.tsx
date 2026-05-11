@@ -234,8 +234,23 @@ function GeneratePage() {
                   {copied ? <Check className="size-3" /> : <Copy className="size-3" />}
                   {copied ? "Copied" : "Copy"}
                 </button>
-                <button className="ml-auto px-4 py-2 text-xs bg-indigo hover:bg-indigo-hover text-white rounded-sm transition-colors">
-                  Save
+                <button
+                  onClick={() => {
+                    const ctx = (customMode ? "custom" : selected).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "context";
+                    const date = new Date().toISOString().slice(0, 10);
+                    const blob = new Blob([output], { type: "text/plain" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `generated-${ctx}-${date}.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="ml-auto px-4 py-2 text-xs border border-border rounded-sm text-text-secondary hover:text-text-primary hover:border-text-muted"
+                >
+                  Export
                 </button>
               </div>
 
