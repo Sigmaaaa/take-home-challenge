@@ -187,14 +187,11 @@ function ProfilePage() {
 
         <div className="py-3 border-b border-border">
           <div className="text-[10px] small-caps text-text-muted mb-3">Pronoun Ratio{isLow("pronoun_ratio") && <LowMark />}</div>
-          <div className="grid grid-cols-3 gap-3">
-            {([["I", pronI], ["you", pronYou], ["we", pronWe]] as const).map(([k, v]) => (
-              <div key={k}>
-                <div className="flex justify-between mb-1">
-                  <span className="font-mono text-xs text-text-secondary">{k}</span>
-                  <span className="font-mono text-xs text-text-primary">{(v * 100).toFixed(0)}%</span>
-                </div>
-                <Bar value={v} />
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            {([["I", pron.I ?? pron.i ?? pron.first_person], ["you", pron.you ?? pron.second_person], ["we", pron.we ?? pron.first_person_plural]] as const).map(([k, v]) => (
+              <div key={k} className="flex items-center gap-2">
+                <span className="font-mono text-xs text-text-secondary">{k}</span>
+                <PronounBadge level={typeof v === "string" ? v : ""} />
               </div>
             ))}
           </div>
@@ -231,14 +228,39 @@ function ProfilePage() {
         <div className="mt-4 border border-border bg-surface p-5">
           <div className="text-[10px] small-caps text-text-muted mb-2">Extraction Notes</div>
           {meta.extraction_notes && (
-            <p className="text-xs text-text-secondary leading-relaxed mb-2">{meta.extraction_notes}</p>
+            <p className="text-xs text-text-secondary leading-relaxed mb-3">{meta.extraction_notes}</p>
           )}
           {lowDims.length > 0 && (
-            <div className="text-[11px] font-mono text-warning">~{lowDims.length} dimensions flagged as low confidence</div>
+            <div>
+              <div className="text-[11px] font-mono text-warning mb-2">~{lowDims.length} dimensions flagged as low confidence:</div>
+              <div className="flex flex-wrap gap-1.5">
+                {lowDims.map((d) => (
+                  <span key={d} className="inline-block font-mono text-[11px] px-2 py-0.5 border border-warning/40 bg-warning/10 text-warning rounded-sm">
+                    ~{d}
+                  </span>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       )}
     </div>
+  );
+}
+
+function PronounBadge({ level }: { level: string }) {
+  const l = level.toLowerCase();
+  const label = (l || "—").toUpperCase();
+  const cls =
+    l === "high"
+      ? "bg-indigo border-indigo text-white"
+      : l === "moderate"
+      ? "border-indigo text-indigo bg-transparent"
+      : "border-border text-text-muted bg-transparent";
+  return (
+    <span className={`inline-block font-mono text-[10px] px-2 py-0.5 border rounded-sm ${cls}`}>
+      {label}
+    </span>
   );
 }
 
