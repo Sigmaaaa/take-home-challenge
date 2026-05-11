@@ -212,13 +212,17 @@ function GeneratePage() {
           <label className="block text-[10px] small-caps text-text-muted mb-1.5 mt-5">Writing Prompt</label>
           <textarea
             value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
+            onChange={(e) => { setPrompt(e.target.value); if (promptError) setPromptError(null); }}
             placeholder={promptPlaceholder}
             className="w-full min-h-[200px] bg-surface border border-border p-3 font-mono text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-indigo resize-y"
           />
 
+          {promptError && (
+            <div className="mt-2 text-xs text-warning font-mono">{promptError}</div>
+          )}
+
           {error && (
-            <div className="mt-3 border border-danger/50 bg-danger/10 text-danger text-xs px-3 py-2 rounded-sm font-mono">
+            <div className="mt-3 border border-warning/40 bg-warning/10 text-warning text-xs px-3 py-2 rounded-sm font-mono">
               {error}
             </div>
           )}
