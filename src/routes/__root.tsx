@@ -115,6 +115,7 @@ function RootComponent() {
         </main>
       </div>
       <GlobalExtractionLoader />
+      <WelcomeModal />
     </QueryClientProvider>
   );
 }
